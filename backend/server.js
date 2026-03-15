@@ -4,6 +4,7 @@ const app = express();
 const db = require('./config/db')
 const cors = require('cors')
 const profileRoute = require('./routes/profileRoute')
+const userRoute = require('./routes/userRoute')
 
 
 // Middleware 
@@ -18,6 +19,7 @@ app.use("/uploads", express.static("uploads"));
 // Route Middleware 
 
 app.use("/api/profile", profileRoute);
+app.use("/api/user",userRoute);
 
 
 
