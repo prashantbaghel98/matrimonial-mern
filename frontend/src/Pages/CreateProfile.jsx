@@ -1,10 +1,10 @@
-// ProfileForm.jsx
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
 const CreateProfile = ({ mode = "create" }) => {
-  const { id } = useParams(); // profile ID for update
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ const CreateProfile = ({ mode = "create" }) => {
     if (mode === "update" && id) {
       const fetchProfile = async () => {
         try {
-          const res = await axios.get(`http://localhost:8080/api/profile/${id}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile/${id}`);
           setFormData(res.data);
           if (res.data.photo) setPreview(res.data.photo);
         } catch (err) {
@@ -59,23 +59,26 @@ const CreateProfile = ({ mode = "create" }) => {
     try {
       let res;
       if (mode === "create") {
-        res = await axios.post("http://localhost:8080/api/profile/create", data, {
+        res = await axios.post(`${import.meta.env.VITE_API_URL}/api/profile/create`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setMessage("Profile created successfully!");
+
+         setTimeout(() => {
+          navigate("/browse-profile");
+        }, 1000);
       } else {
-        res = await axios.put(`http://localhost:8080/api/profile/update/${id}`, data, {
+        res = await axios.put(`${import.meta.env.VITE_API_URL}/api/profile/update/${id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setMessage("Profile updated successfully!");
-        // Navigate after success
+
         setTimeout(() => {
           navigate("/browse-profile");
         }, 1000);
       }
+
       console.log(res.data);
-
-
 
     } catch (err) {
       console.error(err);
@@ -85,16 +88,15 @@ const CreateProfile = ({ mode = "create" }) => {
     }
   };
 
-  // Delete profile function
+  // Delete profile
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this profile?")) return;
 
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:8080/api/profile/delete/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/profile/delete/${id}`);
       setMessage("Profile deleted successfully!");
-      console.log("Profile deleted");
-      navigate("/browse-profile"); // redirect to home or profiles list
+      navigate("/browse-profile");
     } catch (err) {
       console.error(err);
       setMessage("Error deleting profile");
@@ -103,7 +105,6 @@ const CreateProfile = ({ mode = "create" }) => {
     }
   };
 
-  // Fields configuration
   const inputFields = [
     { label: "Name", name: "name" },
     { label: "Date of Birth", name: "dob", type: "date" },
@@ -121,13 +122,13 @@ const CreateProfile = ({ mode = "create" }) => {
     { label: "Mother Occupation", name: "motherOccupation" },
     { label: "Full Address", name: "fullAddress" },
     { label: "City", name: "city" },
-    { label: "Residence Address", name: "residenceAddress" },
     { label: "Contact Number", name: "contactNo" },
   ];
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center mt-20 p-6">
       <div className="max-w-6xl w-full bg-white shadow-2xl rounded-3xl overflow-hidden grid md:grid-cols-3">
+
         {/* Photo Panel */}
         <div className="bg-purple-50 p-8 flex flex-col items-center justify-center">
           {preview ? (
@@ -141,6 +142,7 @@ const CreateProfile = ({ mode = "create" }) => {
               Preview
             </div>
           )}
+
           <label className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-full cursor-pointer transition-all">
             {mode === "create" ? "Upload Photo" : "Change Photo"}
             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -149,9 +151,23 @@ const CreateProfile = ({ mode = "create" }) => {
 
         {/* Form Panel */}
         <div className="md:col-span-2 p-10">
-          <h2 className="text-3xl font-bold text-purple-700 mb-8 text-center md:text-left">
-            {mode === "create" ? "Create Your Profile" : "Update Your Profile"}
-          </h2>
+
+          {/* Title + Back Button */}
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-purple-700">
+              {mode === "create" ? "Create Your Profile" : "Update Your Profile"}
+            </h2>
+
+            {mode === "update" && (
+              <button
+                type="button"
+                onClick={() => navigate("/browse-profile")}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-5 py-2 rounded-lg transition"
+              >
+                ← Back
+              </button>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {inputFields.map(field => (
@@ -185,13 +201,14 @@ const CreateProfile = ({ mode = "create" }) => {
                   onChange={handleChange}
                   value={formData[sel.name] || ""}
                   required
-                  className="peer w-full border-b-2 border-gray-300 focus:border-purple-500 outline-none pt-5 pb-2 bg-transparent text-gray-700 transition-colors"
+                  className="peer w-full border-b-2 border-gray-300 focus:border-purple-500 outline-none pt-5 pb-2 bg-transparent text-gray-700"
                 >
                   <option value="" disabled hidden></option>
                   {sel.options.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
+
                 <label className="absolute left-0 top-0 text-gray-400 text-sm transition-all
                   peer-focus:top-0 peer-focus:text-purple-500 peer-focus:text-sm">
                   {sel.label}
@@ -199,8 +216,8 @@ const CreateProfile = ({ mode = "create" }) => {
               </div>
             ))}
 
-            {/* Submit & Delete Buttons */}
-            <div className="col-span-1 md:col-span-2 text-center mt-6 flex flex-col md:flex-row gap-4 justify-center">
+            {/* Submit Button */}
+            <div className="col-span-1 md:col-span-2 text-center mt-6">
               <button
                 type="submit"
                 className="bg-gradient-to-r from-purple-500 to-purple-700 text-white font-bold px-10 py-3 rounded-full shadow-lg hover:scale-105 transition-transform"
@@ -208,21 +225,14 @@ const CreateProfile = ({ mode = "create" }) => {
               >
                 {loading ? "Submitting..." : mode === "create" ? "Create Profile" : "Update Profile"}
               </button>
-
-              {/* {mode === "update" && (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold px-10 py-3 rounded-full shadow-lg transition-transform"
-                  disabled={loading}
-                >
-                  {loading ? "Deleting..." : "Delete Profile"}
-                </button>
-              )} */}
             </div>
           </form>
 
-          {message && <p className="mt-6 text-center text-green-600 font-medium">{message}</p>}
+          {message && (
+            <p className="mt-6 text-center text-green-600 font-medium">
+              {message}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -230,3 +240,4 @@ const CreateProfile = ({ mode = "create" }) => {
 };
 
 export default CreateProfile;
+

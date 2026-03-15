@@ -9,7 +9,7 @@ const createProfile = async (req, res) => {
     const {
       name, dob, time, place, height, colour, education, occupation, income,
       gotraFather, gotraMother, fatherName, fatherOccupation, motherName, motherOccupation,
-      fullAddress, city, residenceAddress, contactNo, gender, maritalStatus
+      fullAddress, city, contactNo, gender, maritalStatus
     } = req.body;
 
     // Check if file exists
@@ -30,7 +30,7 @@ const createProfile = async (req, res) => {
     const profile = await profileModel.create({
       name, dob, time, place, height, colour, education, occupation, income,
       gotraFather, gotraMother, fatherName, fatherOccupation, motherName, motherOccupation,
-      fullAddress, city, residenceAddress, contactNo, photo: photoUrl, gender, maritalStatus
+      fullAddress, city, contactNo, photo: photoUrl, gender, maritalStatus
     });
 
     res.status(201).json(profile);

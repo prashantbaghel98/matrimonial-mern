@@ -21,7 +21,6 @@ const profileSchema = new mongoose.Schema({
   motherOccupation: String,
   fullAddress: String,
   city: String,
-  residenceAddress: String,
   contactNo: String,
   photo: String,
   gender: {

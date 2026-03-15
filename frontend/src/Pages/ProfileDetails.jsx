@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { User, GraduationCap, Users, Heart } from "lucide-react";
-import { useParams } from "react-router-dom";
+
+import React, { useContext, useEffect, useState } from "react";
+import { User, GraduationCap, Users, Heart, X } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const ProfileDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,7 +18,7 @@ const ProfileDetails = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8080/api/profile/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile/${id}`);
         setProfile(res.data);
       } catch (err) {
         console.error(err);
@@ -30,8 +35,18 @@ const ProfileDetails = () => {
   if (!profile) return <p className="text-center mt-10">Profile not found</p>;
 
   return (
-    <div className="bg-gray-50 min-h-screen py-20 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 space-y-8">
+    <div className="bg-gray-50 min-h-screen py-20 px-2 sm:px-4 relative">
+
+      {/* Close Button */}
+      <button
+        onClick={() => navigate("/browse-profile")}
+        className="mb-4 sm:absolute left-[70%] top-[10%] bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+      >
+        ← Back
+      </button>
+
+
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-3 sm:p-8 space-y-8">
 
         {/* Header */}
         <div className="flex items-center gap-6">
@@ -43,7 +58,7 @@ const ProfileDetails = () => {
           <div>
             <h2 className="text-2xl font-bold">{profile.name}</h2>
             <p className="text-gray-500">
-              {profile.occupation} • {profile.city}
+              {profile.occupation} ({profile.city})
             </p>
             <div className="flex gap-3 mt-2 text-sm">
               <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded">
@@ -87,22 +102,25 @@ const ProfileDetails = () => {
               <p className="text-gray-400">Mother Gotra</p>
               <p>{profile.gotraMother || "-"}</p>
             </div>
-            <div>
-              <p className="text-gray-400">Contact No.</p>
-              <p>{profile.contactNo || "-"}</p>
-            </div>
+
+            {user?<>  <div>
+                  <p className="text-gray-400">Contact No.</p>
+                  <p>{profile.contactNo || "-"}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-400">City</p>
+                  <p>{profile.city || "-"}</p>
+                </div></>:<></>}
+              
+            
             <div>
               <p className="text-gray-400">Full Address</p>
               <p>{profile.fullAddress || "-"}</p>
             </div>
-            <div>
-              <p className="text-gray-400">Residence Address</p>
-              <p>{profile.residenceAddress || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">City</p>
-              <p>{profile.city || "-"}</p>
-            </div>
+
+        
+
             <div>
               <p className="text-gray-400">Gender</p>
               <p>{profile.gender || "-"}</p>
@@ -175,3 +193,4 @@ const ProfileDetails = () => {
 };
 
 export default ProfileDetails;
+
