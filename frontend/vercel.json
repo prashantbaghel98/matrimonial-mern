@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://matrimonial-mern-backend.onrender.com/sitemap.xml"
+    }
+  ]
+}
