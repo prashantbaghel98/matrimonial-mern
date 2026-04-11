@@ -94,6 +94,8 @@ const BrowseProfiles = () => {
   return (
     <section className="bg-gray-50 min-h-screen py-20 px-4 md:px-6">
 
+      
+
       {/* Heading + Filters */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-10 gap-6">
 

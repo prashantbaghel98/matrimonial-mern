@@ -7,6 +7,7 @@ const profileRoute = require('./routes/profileRoute')
 const userRoute = require('./routes/userRoute')
 const cookieParser = require('cookie-parser');
 const path = require("path");
+const { siteMap } = require('./controllers/siteMap');
 
 
 // Middleware 
@@ -26,10 +27,10 @@ app.use("/api/profile", profileRoute);
 app.use("/api/user",userRoute);
 
 
+// Site Map 
+app.get("/sitemap.xml", siteMap);
 
-// app.get('/',(req,res)=>{
-//     res.send("API Working")
-// })
+
 
 
 // 🔥 fallback (VERY IMPORTANT)
