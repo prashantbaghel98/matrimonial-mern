@@ -1,0 +1,85 @@
+/* ================= MOBILE (<=600px) ================= */
+@media (max-width: 600px) {
+
+  .bioPage {
+    padding: 15px !important;
+  }
+
+  .card {
+    padding: 15px !important;
+  }
+
+  .header h2  {
+  font-size: 16px!important;
+  font-weight: 800;
+    gap: 15px;
+  }
+
+   .header p  {
+  font-size: 15px!important;
+  }
+
+
+
+  .grid  {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    font-size: 14px!important;
+  }
+
+  .partnerBox {
+    grid-template-columns: 1fr 1fr!important;
+    border-radius: 100px;
+    font-size: 12px;
+
+  }
+
+  .row {
+    flex-direction: column !important;
+  }
+
+  .bio-badge {
+    margin-top: 1px!important;
+    font-size: 12px!important;
+  }
+
+  img {
+    width: 100px !important;
+    height: 120px !important;
+  }
+
+}
+
+
+/* ================= TABLET (600px - 1024px) ================= */
+@media (min-width: 601px) and (max-width: 1024px) {
+
+  .bioPage {
+    padding: 25px !important;
+  }
+
+  .card {
+    padding: 25px !important;
+  }
+
+  .header {
+    gap: 10px;
+  }
+
+  .grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+  }
+
+  .partnerBox {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  img {
+    width: 110px !important;
+    height: 140px !important;
+  }
+
+}

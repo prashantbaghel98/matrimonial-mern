@@ -104,13 +104,13 @@ const Footer = () => {
             </h4>
 
             <ul className="space-y-3 text-white/80">
-              <li className="hover:text-yellow-400 transition cursor-pointer">
+              <li className="hover:text-yellow-400 transition">
                 Pal Community
               </li>
-              <li className="hover:text-yellow-400 transition cursor-pointer">
+              <li className="hover:text-yellow-400 transition">
                 Baghel Community
               </li>
-              <li className="hover:text-yellow-400 transition cursor-pointer">
+              <li className="hover:text-yellow-400 transition">
                 Dhangar Community
               </li>
             </ul>
@@ -154,7 +154,15 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-white/70 text-sm">
 
           <p>
-            © {new Date().getFullYear()} Apna Vivah. All rights reserved.
+            © {new Date().getFullYear()} Apna Vivah. All rights reserved. Developed By{" "}
+            <a
+              href="https://worldtricks4u.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "white", textDecoration: "none", fontWeight: "500" }}
+            >
+              Worldtricks4u
+            </a>
           </p>
 
           <p className="mt-4 md:mt-0">

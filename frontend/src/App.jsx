@@ -14,6 +14,7 @@ import Dashboard from './Pages/Dashboard'
 import CreateProfile from './Pages/CreateProfile'
 import { AuthProvider } from "./context/AuthContext";
 import Login from './Pages/Login'
+import ScrollToTop from './Components/ScrollToTop'
 
 
 
@@ -25,7 +26,7 @@ function App() {
     <>
     
     <Header/>
-
+<ScrollToTop/>
     <Routes>
       <Route path="/" element={<Home/>} />
       <Route path='/membership' element={<Membership/>}/>

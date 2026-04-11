@@ -1,196 +1,321 @@
-
 import React, { useContext, useEffect, useState } from "react";
-import { User, GraduationCap, Users, Heart, X } from "lucide-react";
+import { User, GraduationCap, Users, Heart } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import "./ProfileDetails.css"
+
 
 const ProfileDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+
+
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile/${id}`);
-        setProfile(res.data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load profile.");
-      } finally {
-        setLoading(false);
-      }
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/profile/${id}`
+      );
+      setProfile(res.data);
     };
     fetchProfile();
   }, [id]);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
-  if (!profile) return <p className="text-center mt-10">Profile not found</p>;
+  // ✅ FINAL PDF FUNCTION (NO UI CHANGE)
+  const downloadPDF = async () => {
+    const original = document.getElementById("pdf-content");
+
+    // 🔥 Clone element (hidden)
+    const clone = original.cloneNode(true);
+    clone.style.position = "fixed";
+    clone.style.top = "-9999px";
+    clone.style.left = "0";
+    clone.style.padding = "30px";
+    clone.style.width = "800px";
+    clone.style.background = "#ffffff";
+    clone.style.boxSizing = "border-box";
+
+    document.body.appendChild(clone);
+
+    // 🔥 Fix badge only for PDF
+    const badges = clone.querySelectorAll("[data-badge]");
+    badges.forEach((el) => {
+      el.style.paddingBottom = "15px";
+    });
+
+    await new Promise((r) => setTimeout(r, 200));
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = 210;
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+
+    pdf.save(`${profile.name}-biodata.pdf`);
+
+    // 🧹 cleanup
+    document.body.removeChild(clone);
+  };
+
+  if (!profile) return <p>Loading...</p>;
 
   return (
-    <div className="bg-gray-50 min-h-screen py-20 px-2 sm:px-4 relative">
+    <div style={styles.page} className="bioPage">
+      {/* Buttons */}
+      <div style={styles.buttonWrapper}>
+        <button onClick={() => navigate("/browse-profile")} style={styles.btn}>
+          ← Back
+        </button>
+        <button onClick={downloadPDF} style={styles.downloadBtn}>
+          Download PDF
+        </button>
+      </div>
 
-      {/* Close Button */}
-      <button
-        onClick={() => navigate("/browse-profile")}
-        className="mb-4 sm:absolute left-[70%] top-[10%] bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
-      >
-        ← Back
-      </button>
+      {/* Visible UI */}
+      <div id="pdf-content" style={styles.card} className="card">
+        {/* 🔴 WATERMARK */}
 
-
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-3 sm:p-8 space-y-8">
-
-        {/* Header */}
-        <div className="flex items-center gap-6">
-          <img
-            src={profile.photo || "https://via.placeholder.com/150"}
-            alt={profile.name}
-            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover"
-          />
-          <div>
-            <h2 className="text-2xl font-bold">{profile.name}</h2>
-            <p className="text-gray-500">
+        <div style={styles.watermarkWrapper}>
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} style={styles.watermarkRow}>
+              Apna Vivah  Apna Vivah  Apna Vivah  Apna Vivah
+            </div>
+          ))}
+        </div>
+        <div style={styles.title}>BIODATA</div>
+        <div style={styles.header} className="header">
+          <div style={styles.infoBlock}>
+            <h2 style={{ margin: 0 }}>{profile.name}</h2>
+            <p style={{ margin: "5px 0" }}>
               {profile.occupation} ({profile.city})
             </p>
-            <div className="flex gap-3 mt-2 text-sm">
-              <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded">
-                {profile.maritalStatus}
-              </span>
+
+            {/* 🔴 IMPORTANT: data-badge */}
+            <div data-badge style={styles.badge} className="bio-badge">
+              {profile.maritalStatus}
             </div>
           </div>
+
+          <img
+            src={profile.photo || "https://via.placeholder.com/150"}
+            style={styles.image}
+          />
         </div>
 
-        {/* Personal Profile */}
-        <section>
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <User size={18} /> Personal Profile
-          </h3>
-          <div className="grid grid-cols-2 gap-6 text-sm">
-            <div>
-              <p className="text-gray-400">Date of Birth</p>
-              <p>{profile.dob}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Time of Birth</p>
-              <p>{profile.time || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Place of Birth</p>
-              <p>{profile.place || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Height</p>
-              <p>{profile.height || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Colour</p>
-              <p>{profile.colour || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Father Gotra</p>
-              <p>{profile.gotraFather || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Mother Gotra</p>
-              <p>{profile.gotraMother || "-"}</p>
-            </div>
+        {/* Sections */}
+        <Section title="Personal Profile" icon={<User size={16}/>}>
+          <Grid>
+            <Item label="DOB" value={profile.dob} />
+            <Item label="Time" value={profile.time} />
+            <Item label="Place" value={profile.place} />
+            <Item label="Height" value={profile.height} />
+            <Item label="Colour" value={profile.colour} />
+            <Item label="Father Gotra" value={profile.gotraFather} />
+            <Item label="Mother Gotra" value={profile.gotraMother} />
+            <Item label="Gender" value={profile.gender} />
+            <Item label="City" value={profile.city} />
+            <Item label="Address" value={profile.fullAddress} />
+            {user && <Item label="Contact" value={profile.contactNo} />}
+          </Grid>
+        </Section>
 
-            {user?<>  <div>
-                  <p className="text-gray-400">Contact No.</p>
-                  <p>{profile.contactNo || "-"}</p>
-                </div>
+        <Section title="Education & Career" icon={<GraduationCap size={16} />}>
+          <Grid>
+            <Item label="Education" value={profile.education} />
+            <Item label="Occupation" value={profile.occupation} />
+            <Item label="Income" value={`₹${profile.income}`} />
+          </Grid>
+        </Section>
 
-                <div>
-                  <p className="text-gray-400">City</p>
-                  <p>{profile.city || "-"}</p>
-                </div></>:<></>}
-              
-            
-            <div>
-              <p className="text-gray-400">Full Address</p>
-              <p>{profile.fullAddress || "-"}</p>
-            </div>
+        <Section title="Family Details" icon={<Users size={16} />}>
+          <Grid>
+            <Item label="Father" value={profile.fatherName} />
+            <Item label="Father Occupation" value={profile.fatherOccupation} />
+            <Item label="Mother" value={profile.motherName} />
+            <Item label="Mother Occupation" value={profile.motherOccupation} />
+          </Grid>
+        </Section>
 
-        
-
-            <div>
-              <p className="text-gray-400">Gender</p>
-              <p>{profile.gender || "-"}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Education & Career */}
-        <section>
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <GraduationCap size={18} /> Education & Career
-          </h3>
-          <div className="grid grid-cols-2 gap-6 text-sm">
-            <div>
-              <p className="text-gray-400">Education</p>
-              <p>{profile.education || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Occupation</p>
-              <p>{profile.occupation || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Income</p>
-              <p>₹{profile.income || "-"}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Family */}
-        <section>
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <Users size={18} /> Family Details
-          </h3>
-          <div className="grid grid-cols-2 gap-6 text-sm">
-            <div>
-              <p className="text-gray-400">Father Name</p>
-              <p>{profile.fatherName || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Father Occupation</p>
-              <p>{profile.fatherOccupation || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Mother Name</p>
-              <p>{profile.motherName || "-"}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Mother Occupation</p>
-              <p>{profile.motherOccupation || "-"}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Partner Expectations */}
-        <section>
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <Heart size={18} /> Partner Expectations
-          </h3>
-          <div className="bg-gray-50 p-4 rounded-xl grid grid-cols-2 gap-4 text-sm">
-            <p>✔ Age: 24 - 28 Years</p>
-            <p>✔ Height: 5'2 to 5'7</p>
+        <Section title="Partner Expectations" icon={<Heart size={16} />}>
+          <div style={styles.partnerBox} className="partnerBox">
+            <p>✔ Age: 24 - 28</p>
+            <p>✔ Height: 5'2 - 5'7</p>
             <p>✔ Never Married</p>
             <p>✔ Religion: Hindu</p>
           </div>
-        </section>
-
+        </Section>
       </div>
     </div>
   );
 };
 
-export default ProfileDetails;
+// 🔹 Components
+const Section = ({ title, icon, children }) => (
+  <div>
+    <h3 style={styles.sectionTitle}>
+      {icon} {title}
+    </h3>
+    {children}
+  </div>
+);
 
+const Grid = ({ children, grid }) => (
+  <div style={styles.grid} className={"grid"}>{children}</div>
+);
+
+const Item = ({ label, value }) => (
+  <div style={styles.row}>
+    <span style={styles.label}>{label}:</span>
+    <span style={styles.value}>{value || "-"}</span>
+  </div>
+);
+
+// 🔹 Styles
+const styles = {
+  page: {
+    background: "#f3f4f6",
+    padding: "40px",
+    minHeight: "100vh",
+  
+  },
+  card: {
+    maxWidth: "800px",
+    margin: "auto",
+    background: "#fff",
+    padding: "30px",
+    border: "1px solid #ccc",
+    position: "relative",
+    overflow: "hidden",
+  },
+  title: {
+    textAlign: "center",
+    fontSize: "22px",
+    fontWeight: "bold",
+    marginBottom: "20px",
+    borderBottom: "2px solid #000",
+    paddingBottom: "10px"
+
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "20px",
+  },
+  image: {
+    width: "120px",
+    height: "150px",
+    objectFit: "cover",
+    border: "2px solid #000",
+  },
+  infoBlock: {
+    flex: 1,
+  },
+  badge: {
+    background: "#e5e7eb",
+    padding: "0 16px",
+    height: "32px",
+    borderRadius: "20px",
+    fontSize: "13px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: "10px",
+    fontWeight: "500",
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    borderBottom: "1px solid #ccc",
+    marginTop: "25px",
+    paddingBottom: "10px",
+    marginBottom: "15px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "10px 40px",
+
+  },
+  row: {
+    display: "flex",
+  },
+  label: {
+    fontWeight: "bold",
+    width: "45%",
+  },
+  value: {
+    width: "55%",
+  },
+  partnerBox: {
+    background: "#f5f5f5",
+    padding: "15px",
+    marginTop: "15px",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "10px",
+  },
+  buttonWrapper: {
+    marginTop: "50px",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "10px",
+    marginBottom: "10px",
+  },
+  btn: {
+    padding: "8px 12px",
+    background: "#e5e7eb",
+    border: "none",
+    borderRadius: "6px",
+  },
+  downloadBtn: {
+    padding: "8px 12px",
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+  },
+
+  watermarkWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    // transform: "rotate(-25deg)",
+    pointerEvents: "none",
+    zIndex: 0,
+  },
+
+  watermarkRow: {
+    fontSize: "32px",
+    color: "rgba(0,0,0,0.02)",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    letterSpacing: "2px",
+  },
+
+  cardContent: {
+    position: "relative",
+    zIndex: 1,
+  }
+};
+
+export default ProfileDetails;

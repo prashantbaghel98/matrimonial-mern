@@ -77,10 +77,10 @@ const StoryCard = ({ story }) => {
             <MapPin size={14} />
             {story.location}
           </div>
-          <div className="flex items-center gap-1">
+          {/* <div className="flex items-center gap-1">
             <Calendar size={14} />
             {story.date}
-          </div>
+          </div> */}
         </div>
 
         <p className="text-gray-600 mt-4 text-sm leading-relaxed">
