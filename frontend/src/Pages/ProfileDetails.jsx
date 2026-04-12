@@ -200,7 +200,7 @@ const styles = {
     margin: "auto",
     background: "#fffaf0",
     padding: "30px",
-    border: "15px double #FF7300",
+    border: "5px double #FF7300",
     position: "relative",
     overflow: "hidden",
      minHeight: "1132px", // A4 height for screen
