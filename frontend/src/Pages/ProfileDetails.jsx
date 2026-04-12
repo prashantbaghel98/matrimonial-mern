@@ -119,7 +119,7 @@ const ProfileDetails = () => {
         </div>
 
         {/* Sections */}
-        <Section title="Personal Profile" icon={<User size={16}/>}>
+        <Section title="Personal Profile" icon={<User size={16} />}>
           <Grid>
             <Item label="DOB" value={profile.dob} />
             <Item label="Time" value={profile.time} />
@@ -130,7 +130,8 @@ const ProfileDetails = () => {
             <Item label="Mother Gotra" value={profile.gotraMother} />
             <Item label="Gender" value={profile.gender} />
             <Item label="City" value={profile.city} />
-            <Item label="Address" value={profile.fullAddress} />
+            {/* <Item label="Address" value={profile.fullAddress} /> */}
+            {user && <Item label="Address" value={profile.fullAddress} />}
             {user && <Item label="Contact" value={profile.contactNo} />}
           </Grid>
         </Section>
@@ -192,16 +193,19 @@ const styles = {
     background: "#f3f4f6",
     padding: "40px",
     minHeight: "100vh",
-  
+
   },
   card: {
     maxWidth: "800px",
     margin: "auto",
-    background: "#fff",
+    background: "#fffaf0",
     padding: "30px",
-    border: "1px solid #ccc",
+    border: "15px double #FF7300",
     position: "relative",
     overflow: "hidden",
+     minHeight: "1132px", // A4 height for screen
+  height: "auto",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
   },
   title: {
     textAlign: "center",
