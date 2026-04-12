@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -7,26 +8,35 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // fixed admin credentials
-    if (email === "admin@admin.com" && password === "000425") {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/user/login`,
+        {
+          username,
+          password,
+        }
+      );
 
-      const adminUser = {
-        name: "Admin",
-        email: "admin@admin.com",
-        role: "admin"
-      };
+      // ✅ Save user + token in context (this already stores in localStorage)
+      login({
+        user: res.data.data,
+        token: res.data.token,
+      });
 
-      login(adminUser);
-      navigate("/"); // redirect to home
-    } else {
-      setError("Invalid username or password");
+      // ❌ REMOVE THIS (duplicate)
+      // localStorage.setItem("token", res.data.token);
+
+      navigate("/");
+
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -39,7 +49,7 @@ const Login = () => {
       >
 
         <h2 className="text-2xl font-bold mb-6 text-center">
-          Admin Login
+          Login
         </h2>
 
         {error && (
@@ -49,11 +59,12 @@ const Login = () => {
         )}
 
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Username"
           className="w-full border p-3 rounded-lg mb-4"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
         />
 
         <input
@@ -62,6 +73,7 @@ const Login = () => {
           className="w-full border p-3 rounded-lg mb-6"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         <button

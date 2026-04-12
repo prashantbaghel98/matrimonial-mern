@@ -1,11 +1,15 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const CreateProfile = ({ mode = "create" }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const {token} = useContext(AuthContext);
+
+  
 
   const [formData, setFormData] = useState({
     name: "", dob: "", time: "", place: "", height: "", colour: "",
@@ -60,7 +64,10 @@ const CreateProfile = ({ mode = "create" }) => {
       let res;
       if (mode === "create") {
         res = await axios.post(`${import.meta.env.VITE_API_URL}/api/profile/create`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "multipart/form-data" ,
+            Authorization: `Bearer ${token}`,
+            
+          },
         });
         setMessage("Profile created successfully!");
 
@@ -69,7 +76,9 @@ const CreateProfile = ({ mode = "create" }) => {
         }, 1000);
       } else {
         res = await axios.put(`${import.meta.env.VITE_API_URL}/api/profile/update/${id}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+           },
         });
         setMessage("Profile updated successfully!");
 
@@ -89,21 +98,26 @@ const CreateProfile = ({ mode = "create" }) => {
   };
 
   // Delete profile
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this profile?")) return;
+  // const handleDelete = async () => {
+  //   if (!window.confirm("Are you sure you want to delete this profile?")) return;
 
-    try {
-      setLoading(true);
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/profile/delete/${id}`);
-      setMessage("Profile deleted successfully!");
-      navigate("/browse-profile");
-    } catch (err) {
-      console.error(err);
-      setMessage("Error deleting profile");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     setLoading(true);
+  //     console.log(token)
+  //     await axios.delete(`${import.meta.env.VITE_API_URL}/api/profile/delete/${id}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, // ✅ SEND TOKEN
+  //       },
+  //     });
+  //     setMessage("Profile deleted successfully!");
+  //     navigate("/browse-profile");
+  //   } catch (err) {
+  //     console.error(err);
+  //     setMessage("Error deleting profile");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const inputFields = [
     { label: "Name", name: "name" },

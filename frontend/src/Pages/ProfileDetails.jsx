@@ -192,6 +192,7 @@ const styles = {
   page: {
     background: "#f3f4f6",
     padding: "40px",
+    marginTop:"10px",
     minHeight: "100vh",
 
   },

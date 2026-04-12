@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const BrowseProfiles = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user,token } = useContext(AuthContext);
 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,16 +50,27 @@ const BrowseProfiles = () => {
 
   // Delete profile
   const handleDelete = async (profileId) => {
-    if (!window.confirm("Are you sure you want to delete this profile?")) return;
+  if (!window.confirm("Are you sure you want to delete this profile?")) return;
 
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/profile/delete/${profileId}`);
-      setProfiles(profiles.filter((p) => p._id !== profileId));
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete profile");
-    }
-  };
+  try {
+    console.log("TOKEN:", token); // 🔥 debug
+
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/profile/delete/${profileId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ FIX
+        },
+      }
+    );
+
+    setProfiles(profiles.filter((p) => p._id !== profileId));
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete profile");
+  }
+};
 
   // Age filter logic
   const checkAgeRange = (age) => {
@@ -106,7 +117,7 @@ const BrowseProfiles = () => {
           {/* Gender */}
           <select
             onChange={(e) => setGender(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
+            className="cursor-pointer px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
           >
             <option value="">Gender</option>
             <option value="Male">Male</option>
@@ -124,7 +135,7 @@ const BrowseProfiles = () => {
           {/* Age */}
           <select
             onChange={(e) => setAgeRange(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
+            className="cursor-pointer px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
           >
             <option value="">Age</option>
             <option value="18-20">18 - 20</option>
@@ -137,7 +148,7 @@ const BrowseProfiles = () => {
           {/* Salary */}
           <select
             onChange={(e) => setIncomeRange(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
+            className="cursor-pointer px-3 py-2 border rounded-lg bg-white w-full md:w-auto"
           >
             <option value="">Salary</option>
             <option value="200000-500000">2LPA - 5LPA</option>
@@ -151,7 +162,7 @@ const BrowseProfiles = () => {
           {/* Marital Status */}
           <select
             onChange={(e) => setMaritalStatus(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white w-full md:w-auto col-span-2 md:col-span-1"
+            className="cursor-pointer px-3 py-2 border rounded-lg bg-white w-full md:w-auto col-span-2 md:col-span-1"
           >
             <option value="">Marital Status</option>
             <option value="Unmarried">Unmarried</option>
@@ -175,7 +186,7 @@ const BrowseProfiles = () => {
             <img
               src={profile.photo || "https://via.placeholder.com/300x240"}
               alt={profile.name}
-              className="w-full h-60 object-cover"
+              className="w-full h-100 object-cover object-center"
             />
 
             <div className="p-4">
@@ -210,7 +221,7 @@ const BrowseProfiles = () => {
 
                 <button
                   onClick={() => navigate(`/browse-profile/${profile._id}`)}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
+                  className="cursor-pointer w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
                 >
                   <FileText size={16} /> View Full Biodata
                 </button>
@@ -219,14 +230,14 @@ const BrowseProfiles = () => {
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => navigate(`/update-profile/${profile._id}`)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200"
+                      className="cursor-pointer flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200"
                     >
                       <Edit size={16} /> Edit
                     </button>
 
                     <button
                       onClick={() => handleDelete(profile._id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-700 py-2 rounded-lg hover:bg-red-200"
+                      className="cursor-pointer flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-700 py-2 rounded-lg hover:bg-red-200"
                     >
                       <Trash2 size={16} /> Delete
                     </button>
@@ -245,7 +256,7 @@ const BrowseProfiles = () => {
         <div className="flex justify-center mt-10">
           <button
             onClick={() => setVisible(visible + 4)}
-            className="px-6 py-3 border rounded-full hover:bg-gray-100"
+            className="px-6 py-3 border rounded-full hover:bg-gray-100 cursor-pointer"
           >
             Load More Matches
           </button>

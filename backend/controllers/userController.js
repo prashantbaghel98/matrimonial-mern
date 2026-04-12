@@ -2,8 +2,7 @@ const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Secret key (move to .env in production)
-const JWT_SECRET = "secretkey";
+
 
 // Register User
 const userCreate = async (req, res) => {
@@ -45,7 +44,7 @@ const userLogin = async (req, res) => {
         if (!isMatch) return res.status(401).json({ success: false, message: "Invalid password" });
 
         // Generate JWT token
-        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1d" });
 
         // Send cookie
         res.cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });

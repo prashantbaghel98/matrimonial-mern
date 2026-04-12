@@ -11,4 +11,4 @@ router.get('/',getAllProfile)
 router.put('/update/:id',authMiddleware , upload.single("photo"),updateProfile)
 router.delete('/delete/:id',authMiddleware, deleteProfile)
 
-module.exports = router; 
+module.exports = router;  
