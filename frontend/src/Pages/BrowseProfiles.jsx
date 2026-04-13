@@ -4,6 +4,7 @@ import { FileText, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const BrowseProfiles = () => {
   const navigate = useNavigate();
@@ -65,10 +66,13 @@ const BrowseProfiles = () => {
     );
 
     setProfiles(profiles.filter((p) => p._id !== profileId));
+        toast.success("Profile deleted successfully!");
+
 
   } catch (err) {
     console.error(err);
-    alert("Failed to delete profile");
+    toast.error(err.response?.data?.message || "Failed to delete profile");
+
   }
 };
 

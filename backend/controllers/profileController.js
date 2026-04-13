@@ -12,6 +12,19 @@ const createProfile = async (req, res) => {
       fullAddress, city, contactNo, gender, maritalStatus
     } = req.body;
 
+
+    const existingProfile = await profileModel.findOne({
+      name,
+      fatherName,
+      contactNo
+    });
+
+    if (existingProfile) {
+      return res.status(400).json({
+        message: "This biodata already exists"
+      });
+    }
+
     // Check if file exists
     let photoUrl = null;
     if (req.file) {
@@ -27,13 +40,17 @@ const createProfile = async (req, res) => {
       photoUrl = uploadResponse.url; // get the CDN URL
     }
 
+
     const profile = await profileModel.create({
       name, dob, time, place, height, colour, education, occupation, income,
       gotraFather, gotraMother, fatherName, fatherOccupation, motherName, motherOccupation,
       fullAddress, city, contactNo, photo: photoUrl, gender, maritalStatus
     });
 
-    res.status(201).json(profile);
+    res.status(201).json({
+      message: "Profile created successfully",
+      data: profile
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });

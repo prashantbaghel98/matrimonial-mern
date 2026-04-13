@@ -33,6 +33,13 @@ const profileSchema = new mongoose.Schema({
   }
 });
 
+// 🔥 IMPORTANT LINE
+profileSchema.index(
+  { name: 1, fatherName:1, contactNo: 1 },
+  { unique: true }
+);
+
+
 const profileModel = mongoose.models.Profile || mongoose.model("Profile", profileSchema);
 
 module.exports = profileModel;

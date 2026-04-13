@@ -15,6 +15,8 @@ import CreateProfile from './Pages/CreateProfile'
 import { AuthProvider } from "./context/AuthContext";
 import Login from './Pages/Login'
 import ScrollToTop from './Components/ScrollToTop'
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 
 
@@ -26,6 +28,7 @@ function App() {
     <>
     
     <Header/>
+<ToastContainer position="top-right" autoClose={3000} theme="colored" />
 <ScrollToTop/>
     <Routes>
       <Route path="/" element={<Home/>} />

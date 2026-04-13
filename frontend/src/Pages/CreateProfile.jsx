@@ -3,13 +3,14 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const CreateProfile = ({ mode = "create" }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const {token} = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
 
-  
+
 
   const [formData, setFormData] = useState({
     name: "", dob: "", time: "", place: "", height: "", colour: "",
@@ -64,23 +65,24 @@ const CreateProfile = ({ mode = "create" }) => {
       let res;
       if (mode === "create") {
         res = await axios.post(`${import.meta.env.VITE_API_URL}/api/profile/create`, data, {
-          headers: { "Content-Type": "multipart/form-data" ,
+          headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
-            
           },
         });
-        setMessage("Profile created successfully!");
+        toast.success(res.data.message || "Profile created successfully!");
 
-         setTimeout(() => {
+        setTimeout(() => {
           navigate("/browse-profile");
         }, 1000);
       } else {
         res = await axios.put(`${import.meta.env.VITE_API_URL}/api/profile/update/${id}`, data, {
-          headers: { "Content-Type": "multipart/form-data",
+          headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
-           },
+          },
         });
-        setMessage("Profile updated successfully!");
+        toast.success("Profile updated successfully!");
 
         setTimeout(() => {
           navigate("/browse-profile");
@@ -90,7 +92,8 @@ const CreateProfile = ({ mode = "create" }) => {
       console.log(res.data);
 
     } catch (err) {
-      console.error(err);
+      // console.error(err);
+      toast.error(err.response.data.message || "Something went wrong");
       setMessage(mode === "create" ? "Error creating profile" : "Error updating profile");
     } finally {
       setLoading(false);
