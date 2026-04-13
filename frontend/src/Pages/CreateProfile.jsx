@@ -25,6 +25,14 @@ const CreateProfile = ({ mode = "create" }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+
+  const formatDateForInput = (date) => {
+  if (!date) return "";
+  const parts = date.split("-");
+  if (parts.length !== 3) return date;
+  return `${parts[2]}-${parts[1]}-${parts[0]}`;
+};
+
   // Fetch existing profile data if update mode
   useEffect(() => {
     if (mode === "update" && id) {
