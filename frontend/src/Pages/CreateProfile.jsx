@@ -122,8 +122,8 @@ const CreateProfile = ({ mode = "create" }) => {
   const inputFields = [
     { label: "Name", name: "name" },
     { label: "Date of Birth", name: "dob", type: "date" },
-    { label: "Time of Birth", name: "time", type: "time" },
-    { label: "Place of Birth", name: "place" },
+    // { label: "Time of Birth", name: "time", type: "time" },
+    // { label: "Place of Birth", name: "place" },
     { label: "Height", name: "height" },
     { label: "Education", name: "education" },
     { label: "Occupation", name: "occupation" },

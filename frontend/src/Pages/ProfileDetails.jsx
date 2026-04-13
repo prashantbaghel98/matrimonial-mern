@@ -15,6 +15,8 @@ const ProfileDetails = () => {
   const [profile, setProfile] = useState(null);
 
 
+  
+
 
 
   useEffect(() => {
@@ -121,9 +123,9 @@ const ProfileDetails = () => {
         {/* Sections */}
         <Section title="Personal Profile" icon={<User size={16} />}>
           <Grid>
-            <Item label="DOB" value={profile.dob} />
-            <Item label="Time" value={profile.time} />
-            <Item label="Place" value={profile.place} />
+            <Item label="DOB" value={profile.dob ? profile.dob.split("-").reverse().join("-") : ""}/>
+            {/* <Item label="Time" value={profile.time} /> */}
+            {/* <Item label="Place" value={profile.place} /> */}
             <Item label="Height" value={profile.height} />
             <Item label="Colour" value={profile.colour} />
             <Item label="Father Gotra" value={profile.gotraFather} />
@@ -153,14 +155,14 @@ const ProfileDetails = () => {
           </Grid>
         </Section>
 
-        <Section title="Partner Expectations" icon={<Heart size={16} />}>
+        {/* <Section title="Partner Expectations" icon={<Heart size={16} />}>
           <div style={styles.partnerBox} className="partnerBox">
             <p>✔ Age: 24 - 28</p>
             <p>✔ Height: 5'2 - 5'7</p>
             <p>✔ Never Married</p>
             <p>✔ Religion: Hindu</p>
           </div>
-        </Section>
+        </Section> */}
       </div>
     </div>
   );
@@ -210,7 +212,7 @@ const styles = {
   },
   title: {
     textAlign: "center",
-    fontSize: "22px",
+    fontSize: "25px",
     fontWeight: "bold",
     marginBottom: "20px",
     borderBottom: "2px solid #000",
