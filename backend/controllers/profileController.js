@@ -144,5 +144,41 @@ const getAllProfile = async (req, res) => {
 
 
 
+const checkDuplicate = async (req, res) => {
+  try {
+    let { name, dob, contactNo } = req.query;
 
-module.exports = { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfile };
+    // ✅ basic validation
+    if (!name || !contactNo || !dob) {
+      return res.json({ exists: false });
+    }
+
+    // ✅ trim values
+    name = name.trim();
+    contactNo = contactNo.trim();
+
+    // ✅ escape regex special characters (important)
+    const escapeRegex = (text) => {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    };
+
+    const safeName = escapeRegex(name);
+    const safeContact = escapeRegex(contactNo);
+
+    // ✅ strict + safe regex match
+    const existing = await profileModel.findOne({
+      name: { $regex: `^${safeName}\\s*$`, $options: "i" }, // case-insensitive exact match
+      dob: dob,
+      contactNo: { $regex: `^\\s*${safeContact}\\s*$` } // allow spaces before/after
+    });
+
+    res.json({ exists: !!existing });
+
+  } catch (error) {
+    console.error("Duplicate check error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports = { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfile,checkDuplicate };

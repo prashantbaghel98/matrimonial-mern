@@ -190,7 +190,7 @@ const BrowseProfiles = () => {
             <img
               src={profile.photo || "https://via.placeholder.com/300x240"}
               alt={profile.name}
-              className="w-full h-100 object-cover object-center"
+              className="w-full h-100 object-cover object-top"
             />
 
             <div className="p-4">
