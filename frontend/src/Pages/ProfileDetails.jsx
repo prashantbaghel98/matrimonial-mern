@@ -103,7 +103,7 @@ const ProfileDetails = () => {
         <div style={styles.title}>BIODATA</div>
         <div style={styles.header} className="header">
           <div style={styles.infoBlock}>
-            <h2 style={{ margin: 0 }}>{profile.name}</h2>
+            <h2 style={{ margin: 0, textTransform: 'capitalize' }}>{profile.name}</h2>
             <p style={{ margin: "5px 0" }}>
               {profile.occupation} ({profile.city})
             </p>

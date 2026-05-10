@@ -194,7 +194,7 @@ const BrowseProfiles = () => {
             />
 
             <div className="p-4">
-              <h3 className="font-semibold text-lg">{profile.name}</h3>
+              <h3 className="font-semibold capitalize text-lg">{profile.name}</h3>
               <p className="text-gray-500 text-sm">{profile.city}</p>
             </div>
 

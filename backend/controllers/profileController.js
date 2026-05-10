@@ -128,18 +128,33 @@ const getProfileById = async (req, res) => {
 
 const getAllProfile = async (req, res) => {
   try {
-    const profiles = await profileModel.find({});
-    if (profiles.length === 0) {
-      return res.status(404).json({ message: "No profiles found" });
-    }
-    console.log(profiles)
-    res.status(200).json(profiles);
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6; // 🔥 fixed: 6 per page
+    const skip = (page - 1) * limit;
+
+    const [profiles, total] = await Promise.all([
+      profileModel
+        .find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      profileModel.countDocuments()
+    ]);
+
+    res.status(200).json({
+      profiles: profiles || [],
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
 
 

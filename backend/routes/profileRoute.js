@@ -4,11 +4,11 @@ const { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfi
 const upload = require('../middleware/upload')
 const authMiddleware = require('../middleware/authMiddleware.js')
 
-// router.get("/:id", getProfileById);
-router.post("/create",upload.single("photo"),createProfile)
+
 router.get("/check",checkDuplicate)
-router.get('/:id',getProfileById)
 router.get('/',getAllProfile)
+router.get('/:id',getProfileById)
+router.post("/create",upload.single("photo"),createProfile)
 router.put('/update/:id',authMiddleware , upload.single("photo"),updateProfile)
 router.delete('/delete/:id',authMiddleware, deleteProfile)
 
