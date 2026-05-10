@@ -125,14 +125,21 @@ const getProfileById = async (req, res) => {
 
 
 // Get All Profile 
-
 const getAllProfile = async (req, res) => {
   try {
+
+    // Current Page
     const page = parseInt(req.query.page) || 1;
-    const limit = 6; // 🔥 fixed: 6 per page
+
+    // Profiles Per Page
+    const limit = 12;
+
+    // Skip Profiles
     const skip = (page - 1) * limit;
 
+    // Get Profiles + Total Count
     const [profiles, total] = await Promise.all([
+
       profileModel
         .find({})
         .sort({ createdAt: -1 })
@@ -141,21 +148,30 @@ const getAllProfile = async (req, res) => {
         .lean(),
 
       profileModel.countDocuments()
+
     ]);
 
     res.status(200).json({
-      profiles: profiles || [],
+
+      profiles,
+
       total,
+
       page,
+
       totalPages: Math.ceil(total / limit),
+
     });
 
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
-
 
 
 
