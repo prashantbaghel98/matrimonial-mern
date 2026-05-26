@@ -114,11 +114,19 @@ const Header = () => {
         <nav className="flex flex-col gap-6 p-6 text-base font-medium text-gray-700">
           <Link to="/" onClick={closeMenu}>Home</Link>
           <Link to="/browse-profile" onClick={closeMenu}>Browse Profile</Link>
+          {
+            user?.role === "user" && (<Link to="/user/dashboard" onClick={closeMenu}
+              className="hover:text-red-600">Dashboard</Link>)
+          }
 
+          {
+            user?.role === "admin" && (<Link to="/admin/dashboard" onClick={closeMenu}
+ className="hover:text-red-600">Dashboard</Link>)
+          }
           {/* Auth Buttons Mobile */}
           {user ? (
             <>
-              <Link to="/profile-create" className="hover:text-red-600">Create Profile</Link>
+              <Link to="/profile-create" onClick={closeMenu} className="hover:text-red-600">Create Profile</Link>
               <button
                 onClick={() => {
                   logout();
