@@ -133,8 +133,8 @@ const ProfileDetails = () => {
             <Item label="Gender" value={profile.gender} />
             <Item label="City" value={profile.city} />
             {/* <Item label="Address" value={profile.fullAddress} /> */}
-            {user && <Item label="Address" value={profile.fullAddress} />}
-            {user && <Item label="Contact" value={profile.contactNo} />}
+            {user?.role ==='admin' && <Item label="Address" value={profile.fullAddress} />}
+            {user?.role ==='admin' && <Item label="Contact" value={profile.contactNo} />}
           </Grid>
         </Section>
 

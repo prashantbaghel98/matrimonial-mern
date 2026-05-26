@@ -1,72 +1,332 @@
-const userModel = require('../models/userModel');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+
+const userModel = require("../models/userModel");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 
+// ======================================================
+// REGISTER USER
+// ======================================================
 
-// Register User
 const userCreate = async (req, res) => {
-    try {
-        const { name, username, email, mobile, password } = req.body;
 
-        const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: "User with this username/email already exists" });
+    try {
+
+        const {
+            name,
+            username,
+            email,
+            mobile,
+            password
+        } = req.body;
+
+        // ================= VALIDATION =================
+
+        if (
+            !name ||
+            !username ||
+            !email ||
+            !mobile ||
+            !password
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
         }
 
+        // ================= CHECK USER =================
+
+        const existingUser = await userModel.findOne({
+            $or: [
+                { username },
+                { email }
+            ]
+        });
+
+        if (existingUser) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Username or email already exists"
+            });
+
+        }
+
+        // ================= HASH PASSWORD =================
+
         const hashPassword = await bcrypt.hash(password, 10);
+
+        // ================= CREATE USER =================
 
         const user = await userModel.create({
             name,
             username,
             email,
             mobile,
-            password: hashPassword
+            password: hashPassword,
+            role: "user"
         });
 
-        user.password = undefined; // Don't send password back
-        res.status(201).json({ success: true, message: "User registered successfully", data: user });
+        // ================= REMOVE PASSWORD =================
+
+        const userData = user.toObject();
+        delete userData.password;
+
+        // ================= RESPONSE =================
+
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            data: userData
+        });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error creating user", error: error.message });
+
+        console.log("REGISTER ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Error creating user",
+            error: error.message
+        });
+
     }
+
 };
 
-// Login User
+
+// ======================================================
+// LOGIN USER
+// ======================================================
+
 const userLogin = async (req, res) => {
+
     try {
-        const { username, password } = req.body;
+
+        const {
+            username,
+            password
+        } = req.body;
+
+        // ================= VALIDATION =================
+
+        if (!username || !password) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Username and password are required"
+            });
+
+        }
+
+        // ================= FIND USER =================
 
         const user = await userModel.findOne({ username });
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).json({ success: false, message: "Invalid password" });
+        if (!user) {
 
-        // Generate JWT token
-        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1d" });
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
 
-        // Send cookie
-        res.cookie("token", token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+        }
 
-        user.password = undefined;
-        res.status(200).json({ success: true, message: "Login successful", data: user, token });
+        // ================= CHECK PASSWORD =================
+
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
+
+        if (!isMatch) {
+
+            return res.status(401).json({
+                success: false,
+                message: "Invalid password"
+            });
+
+        }
+
+        // ================= JWT TOKEN =================
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role
+            },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        // ================= COOKIE =================
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        // ================= REMOVE PASSWORD =================
+
+        const userData = user.toObject();
+        delete userData.password;
+
+        // ================= RESPONSE =================
+
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            data: userData
+        });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Login error", error: error.message });
+
+        console.log("LOGIN ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Login error",
+            error: error.message
+        });
+
     }
+
 };
 
-// Logout
+
+// ======================================================
+// LOGOUT USER
+// ======================================================
+
 const userLogout = async (req, res) => {
-    res.clearCookie("token");
-    res.status(200).json({ success: true, message: "Logout successful" });
+
+    try {
+
+        res.clearCookie("token");
+
+        res.status(200).json({
+            success: true,
+            message: "Logout successful"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
 };
 
-// Protected Route Example
-const getProfile = async (req, res) => {
-    const user = await userModel.findById(req.userId).select("-password");
-    res.status(200).json({ success: true, data: user });
+
+// ======================================================
+// GET LOGGED IN USER PROFILE
+// ======================================================
+
+const userProfile = async (req, res) => {
+
+    try {
+
+        const user = await userModel
+            .findById(req.userId)
+            .select("-password");
+
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+
+    } catch (error) {
+
+        console.log("GET PROFILE ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
 };
 
-module.exports = { userCreate, userLogin, userLogout, getProfile };
+
+
+// ======================================================
+//  USER PROFILE UPDATE
+// ======================================================
+
+
+const userProfileUpdate = async (req, res) => {
+
+   try {
+
+      const {
+         name,
+         email,
+         mobile,
+         password
+      } = req.body;
+
+      const updateData = {
+         name,
+         email,
+         mobile
+      };
+
+      if(password){
+
+         const hashedPassword =
+         await bcrypt.hash(password,10);
+
+         updateData.password =
+         hashedPassword;
+
+      }
+
+      const updatedUser =
+      await userModel.findByIdAndUpdate(
+         req.userId,
+         updateData,
+         { new:true }
+      ).select("-password");
+
+      res.status(200).json({
+         success:true,
+         data:updatedUser
+      });
+
+   } catch (error) {
+
+      res.status(500).json({
+         success:false,
+         message:error.message
+      });
+
+   }
+
+};
+
+module.exports = {
+    userCreate,
+    userLogin,
+    userLogout,
+    userProfile,
+    userProfileUpdate
+};

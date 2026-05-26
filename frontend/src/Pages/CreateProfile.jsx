@@ -151,7 +151,7 @@ const CreateProfile = ({ mode = "create" }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center mt-20 p-6">
+    <div className="min-h-screen  flex items-center justify-center mt-20 p-6">
       <div className="max-w-6xl w-full bg-white shadow-2xl rounded-3xl overflow-hidden grid md:grid-cols-3">
 
         {/* Photo Panel */}

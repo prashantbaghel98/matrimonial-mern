@@ -42,7 +42,16 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center  gap-8 text-sm lg:text-base font-medium text-gray-700">
               <Link to="/" className="hover:text-red-600">Home</Link>
+              {
+                user?.role === "user" && (<Link to="/user/dashboard" className="hover:text-red-600">Dashboard</Link>)
+              }
+
+              {
+                user?.role === "admin" && (<Link to="/admin/dashboard" className="hover:text-red-600">Dashboard</Link>)
+              }
+
               <Link to="/browse-profile" className="hover:text-red-600">Browse Profile</Link>
+
 
               {/* Auth Buttons */}
               {user ? (
@@ -57,12 +66,11 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                
                   <Link to="/about" className="hover:text-red-600">About</Link>
                   <Link to="/membership" className="hover:text-red-600">Membership</Link>
                   <Link to="/success-stories" className="hover:text-red-600">Success Stories</Link>
                   <Link to="/contact" className="hover:text-red-600">Contact</Link>
-                    <Link
+                  <Link
                     to="/login"
                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                   >

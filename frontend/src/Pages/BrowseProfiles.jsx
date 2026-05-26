@@ -35,6 +35,7 @@ const BrowseProfiles = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+
   // Fetch Profiles
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -373,7 +374,7 @@ const BrowseProfiles = () => {
                   View Full Biodata
                 </button>
 
-                {user && (
+                {user?.role ==='admin' && (
 
                   <div className="flex gap-2 mt-2">
 

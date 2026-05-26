@@ -1,17 +1,64 @@
-const profileModel = require('../models/profileModel')
-const imagekit = require('../config/imagekit')
+const profileModel = require("../models/profileModel");
+const imagekit = require("../config/imagekit");
 
 
-// Create Profile 
+// ======================================================
+// CREATE PROFILE
+// ======================================================
 
 const createProfile = async (req, res) => {
+
   try {
+
     const {
-      name, dob, time, place, height, colour, education, occupation, income,
-      gotraFather, gotraMother, fatherName, fatherOccupation, motherName, motherOccupation,
-      fullAddress, city, contactNo, gender, maritalStatus
+      name,
+      dob,
+      time,
+      place,
+      height,
+      colour,
+      education,
+      occupation,
+      income,
+      gotraFather,
+      gotraMother,
+      fatherName,
+      fatherOccupation,
+      motherName,
+      motherOccupation,
+      fullAddress,
+      city,
+      contactNo,
+      gender,
+      maritalStatus
     } = req.body;
 
+    // ======================================================
+    // CHECK USER ALREADY CREATED BIODATA
+    // ======================================================
+
+   if (req.userRole !== "admin") {
+
+  const alreadyCreated =
+  await profileModel.findOne({
+    user: req.userId
+  });
+
+  if (alreadyCreated) {
+
+    return res.status(400).json({
+      success: false,
+      message:
+      "You already created your biodata"
+    });
+
+  }
+
+}
+
+    // ======================================================
+    // CHECK DUPLICATE BIODATA
+    // ======================================================
 
     const existingProfile = await profileModel.findOne({
       name,
@@ -20,54 +67,135 @@ const createProfile = async (req, res) => {
     });
 
     if (existingProfile) {
+
       return res.status(400).json({
+        success: false,
         message: "This biodata already exists"
       });
+
     }
 
-    // Check if file exists
-    let photoUrl = null;
+    // ======================================================
+    // IMAGE UPLOAD
+    // ======================================================
+
+    let photoUrl = "";
+
     if (req.file) {
-      const file = req.file.buffer; // buffer from multer
+
+      const file = req.file.buffer;
+
       const fileName = req.file.originalname;
 
       const uploadResponse = await imagekit.upload({
-        file,             // file buffer
-        fileName,         // original filename
-        folder: "/profiles" // optional folder in ImageKit
+        file,
+        fileName,
+        folder: "/profiles"
       });
 
-      photoUrl = uploadResponse.url; // get the CDN URL
+      photoUrl = uploadResponse.url;
+
     }
 
+    // ======================================================
+    // CREATE PROFILE
+    // ======================================================
 
     const profile = await profileModel.create({
-      name, dob, time, place, height, colour, education, occupation, income,
-      gotraFather, gotraMother, fatherName, fatherOccupation, motherName, motherOccupation,
-      fullAddress, city, contactNo, photo: photoUrl, gender, maritalStatus
+
+      user: req.userId,
+
+      name,
+      dob,
+      time,
+      place,
+      height,
+      colour,
+      education,
+      occupation,
+      income,
+      gotraFather,
+      gotraMother,
+      fatherName,
+      fatherOccupation,
+      motherName,
+      motherOccupation,
+      fullAddress,
+      city,
+      contactNo,
+      photo: photoUrl,
+      gender,
+      maritalStatus
+
     });
 
     res.status(201).json({
+      success: true,
       message: "Profile created successfully",
       data: profile
     });
+
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
+
 };
 
 
-// Update Profile 
+// ======================================================
+// UPDATE PROFILE
+// ======================================================
 
 const updateProfile = async (req, res) => {
+
   try {
+
     const profileId = req.params.id;
+
+    const profile = await profileModel.findById(profileId);
+
+    if (!profile) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found"
+      });
+
+    }
+
+    // ======================================================
+    // ACCESS CONTROL
+    // ======================================================
+
+    if (
+      req.userRole !== "admin" &&
+      profile.user.toString() !== req.userId
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message: "Access denied"
+      });
+
+    }
+
     const updateData = { ...req.body };
 
-    // If a new photo is uploaded
+    // ======================================================
+    // IMAGE UPDATE
+    // ======================================================
+
     if (req.file) {
+
       const file = req.file.buffer;
+
       const fileName = req.file.originalname;
 
       const uploadResponse = await imagekit.upload({
@@ -77,67 +205,149 @@ const updateProfile = async (req, res) => {
       });
 
       updateData.photo = uploadResponse.url;
+
     }
 
-    const updatedProfile = await profileModel.findByIdAndUpdate(
-      profileId,
-      updateData,
-      { new: true } // return the updated document
-    );
+    // ======================================================
+    // UPDATE PROFILE
+    // ======================================================
 
-    if (!updatedProfile) return res.status(404).json({ message: "Profile not found" });
-    res.status(200).json(updatedProfile);
+    const updatedProfile =
+      await profileModel.findByIdAndUpdate(
+        profileId,
+        updateData,
+        { new: true }
+      );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedProfile
+    });
+
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
+
 };
 
 
-// Delete Profile 
+// ======================================================
+// DELETE PROFILE
+// ======================================================
 
 const deleteProfile = async (req, res) => {
+
   try {
+
     const profileId = req.params.id;
-    const deletedProfile = await profileModel.findByIdAndDelete(profileId);
-    if (!deletedProfile) return res.status(404).json({ message: "Profile not found" });
-    res.status(200).json({ message: "Profile deleted successfully" });
+
+    const profile = await profileModel.findById(profileId);
+
+    if (!profile) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found"
+      });
+
+    }
+
+    // ======================================================
+    // ACCESS CONTROL
+    // ======================================================
+
+    if (
+      req.userRole !== "admin" &&
+      profile.user.toString() !== req.userId
+    ) {
+
+      return res.status(403).json({
+        success: false,
+        message: "Access denied"
+      });
+
+    }
+
+    await profileModel.findByIdAndDelete(profileId);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile deleted successfully"
+    });
+
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
+
 };
 
 
-// Get Single Profile 
+// ======================================================
+// GET SINGLE PROFILE
+// ======================================================
 
 const getProfileById = async (req, res) => {
+
   try {
-    const profile = await profileModel.findById(req.params.id);
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-    console.log(profile)
+
+    const profile = await profileModel.findById(
+      req.params.id
+    );
+
+    if (!profile) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found"
+      });
+
+    }
+
     res.status(200).json(profile);
+
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
+
 };
 
 
-// Get All Profile 
+// ======================================================
+// GET ALL PROFILES
+// ======================================================
+
 const getAllProfile = async (req, res) => {
+
   try {
 
-    // Current Page
     const page = parseInt(req.query.page) || 1;
 
-    // Profiles Per Page
-    const limit = 12;
+    const limit = 1000;
 
-    // Skip Profiles
     const skip = (page - 1) * limit;
 
-    // Get Profiles + Total Count
     const [profiles, total] = await Promise.all([
 
       profileModel
@@ -153,13 +363,15 @@ const getAllProfile = async (req, res) => {
 
     res.status(200).json({
 
+      success: true,
+
       profiles,
 
       total,
 
       page,
 
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit)
 
     });
 
@@ -168,48 +380,118 @@ const getAllProfile = async (req, res) => {
     console.error(error);
 
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: error.message
     });
+
   }
+
 };
 
 
+// ======================================================
+// CHECK DUPLICATE
+// ======================================================
 
 const checkDuplicate = async (req, res) => {
+
   try {
+
     let { name, dob, contactNo } = req.query;
 
-    // ✅ basic validation
     if (!name || !contactNo || !dob) {
-      return res.json({ exists: false });
+
+      return res.json({
+        exists: false
+      });
+
     }
 
-    // ✅ trim values
     name = name.trim();
+
     contactNo = contactNo.trim();
 
-    // ✅ escape regex special characters (important)
     const escapeRegex = (text) => {
-      return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return text.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
     };
 
     const safeName = escapeRegex(name);
+
     const safeContact = escapeRegex(contactNo);
 
-    // ✅ strict + safe regex match
     const existing = await profileModel.findOne({
-      name: { $regex: `^${safeName}\\s*$`, $options: "i" }, // case-insensitive exact match
-      dob: dob,
-      contactNo: { $regex: `^\\s*${safeContact}\\s*$` } // allow spaces before/after
+
+      name: {
+        $regex: `^${safeName}\\s*$`,
+        $options: "i"
+      },
+
+      dob,
+
+      contactNo: {
+        $regex: `^\\s*${safeContact}\\s*$`
+      }
+
     });
 
-    res.json({ exists: !!existing });
+    res.json({
+      exists: !!existing
+    });
 
   } catch (error) {
-    console.error("Duplicate check error:", error);
-    res.status(500).json({ message: error.message });
+
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message
+    });
+
   }
+
 };
 
 
-module.exports = { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfile,checkDuplicate };
+
+// User Account Single biodata
+
+const getMyBiodata = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const biodata =
+    await profileModel.findOne({
+      user:req.userId
+    });
+
+    res.status(200).json({
+      success:true,
+      data:biodata
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success:false,
+      message:error.message
+    });
+
+  }
+
+};
+
+
+module.exports = {
+  createProfile,
+  getProfileById,
+  getAllProfile,
+  updateProfile,
+  deleteProfile,
+  checkDuplicate,
+  getMyBiodata
+};

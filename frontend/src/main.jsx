@@ -5,6 +5,12 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
 
+
+if ("scrollRestoration" in history) {
+
+  history.scrollRestoration = "manual";
+
+}
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
   <BrowserRouter>  
