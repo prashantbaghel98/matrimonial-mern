@@ -6,7 +6,7 @@ const WHATSAPP_NUMBER = "917017225698"; // <-- replace with your number
 const plans = [
   {
     name: "Basic",
-    price: "₹999",
+    price: "₹1999",
     duration: "3 Months",
     features: [
       "Verified Profiles Access",
@@ -18,7 +18,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "₹1999",
+    price: "₹2999",
     duration: "6 Months",
     features: [
       "Unlimited Profile Views",
@@ -31,7 +31,7 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "₹2999",
+    price: "₹3999",
     duration: "12 Months",
     features: [
       "All Premium Features",
