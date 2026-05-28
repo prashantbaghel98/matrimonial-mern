@@ -30,12 +30,15 @@ const ProfileDetails = () => {
 
   };
 
-  const handleShare = async () => {
+const handleShare = async () => {
 
-    const profileUrl = `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`
-    const profileUrl2 = `https://apnavivah.in/browse-profile/${profile._id}`
+  const ogUrl =
+  `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`;
 
-    const shareText = `*Apna Vivah New Biodata*
+  const frontendUrl =
+  `https://apnavivah.in/browse-profile/${profile._id}`;
+
+  const shareText = `*Apna Vivah New Biodata*
 
 👤 *Name:* ${capitalize(profile.name)}
 💼 *Occupation:* ${capitalize(profile.occupation)}
@@ -44,39 +47,43 @@ const ProfileDetails = () => {
 🎓 *Education:* ${capitalize(profile.education)}
 
 *Click Here 👇 To View Full Biodata:* 
-${profileUrl2}
+${frontendUrl}
 `;
 
-    // MOBILE SHARE
+  if (navigator.share) {
 
-    if (navigator.share) {
+    try {
 
-      try {
+      await navigator.share({
 
-        await navigator.share({
-          text: shareText
-        });
+        title: `${profile.name} Biodata`,
 
-      } catch (error) {
+        text: shareText,
 
-        console.log(error);
+        url: ogUrl
 
-      }
+      });
 
-    }
+    } catch (error) {
 
-    // WHATSAPP FALLBACK
-
-    else {
-
-      window.open(
-        `https://wa.me/?text=${encodeURIComponent(shareText)}`,
-        "_blank"
-      );
+      console.log(error);
 
     }
 
-  };
+  }
+
+  else {
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(
+        shareText + "\n" + ogUrl
+      )}`,
+      "_blank"
+    );
+
+  }
+
+};
 
 
 
