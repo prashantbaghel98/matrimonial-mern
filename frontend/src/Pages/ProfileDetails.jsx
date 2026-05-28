@@ -32,8 +32,8 @@ const ProfileDetails = () => {
 
 const handleShare = async () => {
 
-  const ogUrl =
-  `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`;
+  const shareUrl =
+  `https://apnavivah.in/s/${profile._id}`;
 
   const frontendUrl =
   `https://apnavivah.in/browse-profile/${profile._id}`;
@@ -60,7 +60,7 @@ ${frontendUrl}
 
         text: shareText,
 
-        url: ogUrl
+        url: shareUrl
 
       });
 
@@ -76,7 +76,7 @@ ${frontendUrl}
 
     window.open(
       `https://wa.me/?text=${encodeURIComponent(
-        shareText + "\n" + ogUrl
+        shareText + "\n" + shareUrl
       )}`,
       "_blank"
     );
