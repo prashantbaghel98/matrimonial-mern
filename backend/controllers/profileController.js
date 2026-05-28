@@ -521,8 +521,6 @@ content="${profile.photo}" />
 <meta property="og:type"
 content="website" />
 
-<meta http-equiv="refresh"
-content="0;url=https://apnavivah.in/browse-profile/ID">
 
 </head>
 
