@@ -496,61 +496,96 @@ const getSharePage = async (req, res) => {
   try {
 
     const profile =
-      await Profile.findById(req.params.id);
+      await profileModel.findById(req.params.id);
 
     if (!profile) {
 
-      return res.send("Profile not found");
+      return res
+        .status(404)
+        .send("Profile not found");
 
     }
 
     const image =
-      profile.photo ||
-      "https://apnavivah.in/founder.png";
+      profile.photo;
 
     const title =
       `${profile.name} Biodata`;
 
     const description =
-      `${profile.occupation} from ${profile.city}`;
+      `${profile.occupation} | ${profile.city}`;
 
-    const redirectUrl =
+    const url =
       `https://apnavivah.in/browse-profile/${profile._id}`;
 
     res.send(`
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8" />
 
 <title>${title}</title>
 
-<meta property="og:title" content="${title}" />
-<meta property="og:description" content="${description}" />
-<meta property="og:image" content="${image}" />
-<meta property="og:url" content="${redirectUrl}" />
-<meta property="og:type" content="website" />
 
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="${title}" />
-<meta name="twitter:description" content="${description}" />
-<meta name="twitter:image" content="${image}" />
 
-<meta http-equiv="refresh" content="0;url=${redirectUrl}" />
+<meta
+  property="og:title"
+  content="${title}csdcsdcs"
+/>
+
+<meta
+  property="og:description"
+  content="${description}"
+/>
+
+<meta
+  property="og:image"
+  content="${image}"
+/>
+
+<meta
+  property="og:url"
+  content="${url}"
+/>
+
+<meta
+  property="og:type"
+  content="website"
+/>
+
+<meta
+  property="twitter:card"
+  content="summary_large_image"
+/>
+
+<meta
+  property="twitter:image"
+  content="${image}"
+/>
+
 
 </head>
 
 <body>
+
 Redirecting...
+
 </body>
 
 </html>
+
 `);
 
   } catch (error) {
 
     console.log(error);
 
-    res.status(500).send("Server Error");
+    res
+      .status(500)
+      .send("Server Error");
 
   }
 

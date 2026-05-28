@@ -6,6 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./ProfileDetails.css"
+
 import { Helmet } from "react-helmet-async";
 
 const ProfileDetails = () => {
@@ -31,7 +32,8 @@ const ProfileDetails = () => {
 
   const handleShare = async () => {
 
-    const profileUrl = `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`;
+    const profileUrl = `https://apnavivah.in/api/profile/share/${profile._id};`
+
     const shareText = `*Apna Vivah New Biodata*
 
 👤 *Name:* ${capitalize(profile.name)}
