@@ -32,8 +32,6 @@ const ProfileDetails = () => {
 
 const handleShare = async () => {
 
-  const shareUrl =
-  `https://apnavivah.in/s/${profile._id}`;
 
   const frontendUrl =
   `https://apnavivah.in/browse-profile/${profile._id}`;
@@ -59,8 +57,6 @@ ${frontendUrl}
         title: `${profile.name} Biodata`,
 
         text: shareText,
-
-        url: shareUrl
 
       });
 
