@@ -32,7 +32,7 @@ const ProfileDetails = () => {
 
   const handleShare = async () => {
 
-    const profileUrl = `https://apnavivah.in/api/profile/share/${profile._id};`
+    const profileUrl = `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`
 
     const shareText = `*Apna Vivah New Biodata*
 

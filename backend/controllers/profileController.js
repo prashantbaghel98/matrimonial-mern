@@ -499,93 +499,48 @@ const getSharePage = async (req, res) => {
       await profileModel.findById(req.params.id);
 
     if (!profile) {
-
-      return res
-        .status(404)
-        .send("Profile not found");
-
+      return res.status(404).send("Not Found");
     }
-
-    const image =
-      profile.photo;
-
-    const title =
-      `${profile.name} Biodata`;
-
-    const description =
-      `${profile.occupation} | ${profile.city}`;
-
-    const url =
-      `https://apnavivah.in/browse-profile/${profile._id}`;
-
+    
     res.send(`
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 
-<meta charset="UTF-8" />
+<title>${profile.name}</title>
 
-<title>${title}</title>
+<meta property="og:title"
+content="${profile.name}" />
 
+<meta property="og:description"
+content="${profile.city}" />
 
+<meta property="og:image"
+content="${profile.photo}" />
 
-<meta
-  property="og:title"
-  content="${title}csdcsdcs"
-/>
-
-<meta
-  property="og:description"
-  content="${description}"
-/>
-
-<meta
-  property="og:image"
-  content="${image}"
-/>
-
-<meta
-  property="og:url"
-  content="${url}"
-/>
-
-<meta
-  property="og:type"
-  content="website"
-/>
-
-<meta
-  property="twitter:card"
-  content="summary_large_image"
-/>
-
-<meta
-  property="twitter:image"
-  content="${image}"
-/>
-
+<meta property="og:type"
+content="website" />
 
 </head>
 
 <body>
 
-Redirecting...
+<h1>${profile.name}</h1>
+
+<img
+src="${profile.photo}"
+width="300"
+/>
 
 </body>
-
 </html>
-
 `);
 
   } catch (error) {
 
     console.log(error);
 
-    res
-      .status(500)
-      .send("Server Error");
+    res.status(500).send(error.message);
 
   }
 
