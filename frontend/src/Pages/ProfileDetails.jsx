@@ -33,7 +33,7 @@ const ProfileDetails = () => {
   const handleShare = async () => {
 
     const profileUrl = `${import.meta.env.VITE_API_URL}/api/profile/share/${profile._id}`
-    // const profileUrl = `https://apnavivah.in/browse-profile/${profile._id}`
+    const profileUrl2 = `https://apnavivah.in/browse-profile/${profile._id}`
 
     const shareText = `*Apna Vivah New Biodata*
 
@@ -44,7 +44,7 @@ const ProfileDetails = () => {
 🎓 *Education:* ${capitalize(profile.education)}
 
 *Click Here 👇 To View Full Biodata:* 
-${profileUrl}
+${profileUrl2}
 `;
 
     // MOBILE SHARE
