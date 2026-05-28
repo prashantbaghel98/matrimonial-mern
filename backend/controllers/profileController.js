@@ -491,6 +491,73 @@ const getMyBiodata = async (
 
 
 
+const getSharePage = async (req, res) => {
+
+  try {
+
+    const profile =
+      await Profile.findById(req.params.id);
+
+    if (!profile) {
+
+      return res.send("Profile not found");
+
+    }
+
+    const image =
+      profile.photo ||
+      "https://apnavivah.in/founder.png";
+
+    const title =
+      `${profile.name} Biodata`;
+
+    const description =
+      `${profile.occupation} from ${profile.city}`;
+
+    const redirectUrl =
+      `https://apnavivah.in/browse-profile/${profile._id}`;
+
+    res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>${title}</title>
+
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${description}" />
+<meta property="og:image" content="${image}" />
+<meta property="og:url" content="${redirectUrl}" />
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${description}" />
+<meta name="twitter:image" content="${image}" />
+
+<meta http-equiv="refresh" content="0;url=${redirectUrl}" />
+
+</head>
+
+<body>
+Redirecting...
+</body>
+
+</html>
+`);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).send("Server Error");
+
+  }
+
+};
+
+
+
 module.exports = {
   createProfile,
   getProfileById,
@@ -498,5 +565,6 @@ module.exports = {
   updateProfile,
   deleteProfile,
   checkDuplicate,
-  getMyBiodata
+  getMyBiodata,
+  getSharePage
 };
