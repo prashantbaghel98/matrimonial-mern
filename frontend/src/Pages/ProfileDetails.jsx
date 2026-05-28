@@ -6,7 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./ProfileDetails.css"
-
+import { Helmet } from "react-helmet";
 
 const ProfileDetails = () => {
   const { id } = useParams();
@@ -15,7 +15,67 @@ const ProfileDetails = () => {
   const [profile, setProfile] = useState(null);
 
 
-  
+
+
+  const capitalize = (text) => {
+
+    if (!text) return "";
+
+    return text
+      .toLowerCase()
+      .replace(/\b\w/g, (char) =>
+        char.toUpperCase()
+      );
+
+  };
+
+  const handleShare = async () => {
+
+    const profileUrl =
+      window.location.href;
+
+    const shareText = `*Apna Vivah New Biodata*
+
+👤 *Name:* ${capitalize(profile.name)}
+💼 *Occupation:* ${capitalize(profile.occupation)}
+📍 *City:* ${capitalize(profile.city)}
+💰 *Income:* ₹${profile.income}
+🎓 *Education:* ${capitalize(profile.education)}
+
+*Click Here 👇 To View Full Biodata:* 
+${profileUrl}
+`;
+
+    // MOBILE SHARE
+
+    if (navigator.share) {
+
+      try {
+
+        await navigator.share({
+          text: shareText
+        });
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+    // WHATSAPP FALLBACK
+
+    else {
+
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+        "_blank"
+      );
+
+    }
+
+  };
 
 
 
@@ -78,84 +138,164 @@ const ProfileDetails = () => {
   if (!profile) return <p>Loading...</p>;
 
   return (
-    <div style={styles.page} className="bioPage">
-      {/* Buttons */}
-      <div style={styles.buttonWrapper}>
-        <button onClick={() => navigate("/browse-profile")} style={styles.btn}>
-          ← Back
-        </button>
-        <button onClick={downloadPDF} style={styles.downloadBtn}>
-          Download PDF
-        </button>
-      </div>
+    <>
 
-      {/* Visible UI */}
-      <div id="pdf-content" style={styles.card} className="card">
-        {/* 🔴 WATERMARK */}
+      <Helmet>
 
-        <div style={styles.watermarkWrapper}>
-          {Array.from({ length: 15 }).map((_, i) => (
-            <div key={i} style={styles.watermarkRow}>
-              Apna Vivah  Apna Vivah  Apna Vivah  Apna Vivah
-            </div>
-          ))}
+        <title>
+          {profile.name} Biodata
+        </title>
+
+        <meta
+          property="og:title"
+          content={`${profile.name} | ${profile.occupation}`}
+        />
+
+        <meta
+          property="og:description"
+          content={`${profile.name} from ${profile.city}`}
+        />
+
+        <meta
+          property="og:image"
+          content={profile.photo}
+        />
+
+        <meta
+          property="og:url"
+          content={window.location.href}
+        />
+
+        <meta
+          property="og:type"
+          content="website"
+        />
+
+        {/* WhatsApp */}
+
+        <meta
+          property="twitter:card"
+          content="summary_large_image"
+        />
+
+        <meta
+          property="twitter:image"
+          content={profile.photo}
+        />
+
+      </Helmet>
+
+
+
+
+      <div style={styles.page} className="bioPage">
+        {/* Buttons */}
+        <div style={styles.buttonWrapper}>
+          <button onClick={() => navigate("/browse-profile")} style={styles.btn}>
+            ← Back
+          </button>
+          <button onClick={downloadPDF} style={styles.downloadBtn}>
+            Download PDF
+          </button>
+
+
+          <button
+            onClick={handleShare}
+            style={styles.shareBtn}
+          >
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+
+              <circle cx="6" cy="12" r="3"></circle>
+
+              <circle cx="18" cy="19" r="3"></circle>
+
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+
+          </button>
         </div>
-        <div style={styles.title}>BIODATA</div>
-        <div style={styles.header} className="header">
-          <div style={styles.infoBlock}>
-            <h2 style={{ margin: 0 ,textTransform: "capitalize"  }}>{profile.name}</h2>
-            <p style={{ margin: "5px 0" }}>
-              {profile.occupation} ({profile.city})
-            </p>
 
-            {/* 🔴 IMPORTANT: data-badge */}
-            <div data-badge style={styles.badge} className="bio-badge">
-              {profile.maritalStatus}
+        {/* Visible UI */}
+        <div id="pdf-content" style={styles.card} className="card">
+          {/* 🔴 WATERMARK */}
+
+          <div style={styles.watermarkWrapper}>
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div key={i} style={styles.watermarkRow}>
+                Apna Vivah  Apna Vivah  Apna Vivah  Apna Vivah
+              </div>
+            ))}
+          </div>
+          <div style={styles.title}>BIODATA</div>
+          <div style={styles.header} className="header">
+            <div style={styles.infoBlock}>
+              <h2 style={{ margin: 0, textTransform: "capitalize" }}>{profile.name}</h2>
+              <p style={{ margin: "5px 0" }}>
+                {profile.occupation} ({profile.city})
+              </p>
+
+              {/* 🔴 IMPORTANT: data-badge */}
+              <div data-badge style={styles.badge} className="bio-badge">
+                {profile.maritalStatus}
+              </div>
             </div>
+
+            <img
+              src={profile.photo || "https://via.placeholder.com/150"}
+              style={styles.image}
+            />
           </div>
 
-          <img
-            src={profile.photo || "https://via.placeholder.com/150"}
-            style={styles.image}
-          />
-        </div>
+          {/* Sections */}
+          <Section title="Personal Profile" icon={<User size={16} />}>
+            <Grid>
+              <Item label="DOB" value={profile.dob ? profile.dob.split("-").reverse().join("-") : ""} />
+              {/* <Item label="Time" value={profile.time} /> */}
+              {/* <Item label="Place" value={profile.place} /> */}
+              <Item label="Height" value={profile.height} />
+              <Item label="Colour" value={profile.colour} />
+              <Item label="Father Gotra" value={profile.gotraFather} />
+              <Item label="Mother Gotra" value={profile.gotraMother} />
+              <Item label="Gender" value={profile.gender} />
+              <Item label="City" value={profile.city} />
+              {/* <Item label="Address" value={profile.fullAddress} /> */}
+              {user?.role === 'admin' && <Item label="Address" value={profile.fullAddress} />}
+              {user?.role === 'admin' && <Item label="Contact" value={profile.contactNo} />}
+            </Grid>
+          </Section>
 
-        {/* Sections */}
-        <Section title="Personal Profile" icon={<User size={16} />}>
-          <Grid>
-            <Item label="DOB" value={profile.dob ? profile.dob.split("-").reverse().join("-") : ""}/>
-            {/* <Item label="Time" value={profile.time} /> */}
-            {/* <Item label="Place" value={profile.place} /> */}
-            <Item label="Height" value={profile.height} />
-            <Item label="Colour" value={profile.colour} />
-            <Item label="Father Gotra" value={profile.gotraFather} />
-            <Item label="Mother Gotra" value={profile.gotraMother} />
-            <Item label="Gender" value={profile.gender} />
-            <Item label="City" value={profile.city} />
-            {/* <Item label="Address" value={profile.fullAddress} /> */}
-            {user?.role ==='admin' && <Item label="Address" value={profile.fullAddress} />}
-            {user?.role ==='admin' && <Item label="Contact" value={profile.contactNo} />}
-          </Grid>
-        </Section>
+          <Section title="Education & Career" icon={<GraduationCap size={16} />}>
+            <Grid>
+              <Item label="Education" value={profile.education} />
+              <Item label="Occupation" value={profile.occupation} />
+              <Item label="Income" value={`₹${profile.income}`} />
+            </Grid>
+          </Section>
 
-        <Section title="Education & Career" icon={<GraduationCap size={16} />}>
-          <Grid>
-            <Item label="Education" value={profile.education} />
-            <Item label="Occupation" value={profile.occupation} />
-            <Item label="Income" value={`₹${profile.income}`} />
-          </Grid>
-        </Section>
+          <Section title="Family Details" icon={<Users size={16} />}>
+            <Grid>
+              <Item label="Father" value={profile.fatherName} />
+              <Item label="Father Occupation" value={profile.fatherOccupation} />
+              <Item label="Mother" value={profile.motherName} />
+              <Item label="Mother Occupation" value={profile.motherOccupation} />
+            </Grid>
+          </Section>
 
-        <Section title="Family Details" icon={<Users size={16} />}>
-          <Grid>
-            <Item label="Father" value={profile.fatherName} />
-            <Item label="Father Occupation" value={profile.fatherOccupation} />
-            <Item label="Mother" value={profile.motherName} />
-            <Item label="Mother Occupation" value={profile.motherOccupation} />
-          </Grid>
-        </Section>
-
-        {/* <Section title="Partner Expectations" icon={<Heart size={16} />}>
+          {/* <Section title="Partner Expectations" icon={<Heart size={16} />}>
           <div style={styles.partnerBox} className="partnerBox">
             <p>✔ Age: 24 - 28</p>
             <p>✔ Height: 5'2 - 5'7</p>
@@ -163,9 +303,11 @@ const ProfileDetails = () => {
             <p>✔ Religion: Hindu</p>
           </div>
         </Section> */}
+        </div>
       </div>
-    </div>
+    </>
   );
+
 };
 
 // 🔹 Components
@@ -194,7 +336,7 @@ const styles = {
   page: {
     background: "#f3f4f6",
     padding: "40px",
-    marginTop:"10px",
+    marginTop: "10px",
     minHeight: "100vh",
 
   },
@@ -206,8 +348,8 @@ const styles = {
     border: "5px double #FF7300",
     position: "relative",
     overflow: "hidden",
-     minHeight: "1132px", // A4 height for screen
-  height: "auto",
+    minHeight: "1132px", // A4 height for screen
+    height: "auto",
     boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
   },
   title: {
@@ -322,7 +464,16 @@ const styles = {
   cardContent: {
     position: "relative",
     zIndex: 1,
-  }
+  },
+
+  shareBtn: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 };
 
 export default ProfileDetails;

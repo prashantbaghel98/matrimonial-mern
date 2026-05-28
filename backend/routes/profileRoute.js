@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfile, checkDuplicate,getMyBiodata } = require("../controllers/profileController");
+const { createProfile, getProfileById, getAllProfile, updateProfile, deleteProfile, checkDuplicate,getMyBiodata, getSocialProfile } = require("../controllers/profileController");
 const upload = require('../middleware/upload')
 const authMiddleware = require('../middleware/authMiddleware.js')
 
