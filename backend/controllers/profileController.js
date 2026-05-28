@@ -501,7 +501,7 @@ const getSharePage = async (req, res) => {
     if (!profile) {
       return res.status(404).send("Not Found");
     }
-    
+
     res.send(`
 <!DOCTYPE html>
 <html>
@@ -518,11 +518,32 @@ content="${profile.city}" />
 <meta property="og:image"
 content="${profile.photo}" />
 
+<meta property="og:image:secure_url"
+content="${profile.photo}" />
+
+<meta property="og:image:type"
+content="image/jpeg" />
+
+<meta property="og:image:width"
+content="1200" />
+
+<meta property="og:image:height"
+content="630" />
+
 <meta property="og:type"
 content="website" />
 
+<meta property="og:url"
+content="https://apnavivah.in/s/${profile._id}" />
+
+<meta name="twitter:card"
+content="summary_large_image" />
+
+<meta name="twitter:image"
+content="${profile.photo}" />
+
 <meta http-equiv="refresh"
-content="0;url=https://apnavivah.in/browse-profile/${profile._id}">
+content="2;url=https://apnavivah.in/browse-profile/${profile._id}">
 
 </head>
 
