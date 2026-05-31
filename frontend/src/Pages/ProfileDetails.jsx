@@ -55,7 +55,6 @@ ${frontendUrl}
       await navigator.share({
 
         title: `${profile.name} Biodata`,
-
         text: shareText,
 
       });

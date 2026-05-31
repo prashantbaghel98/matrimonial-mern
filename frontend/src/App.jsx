@@ -20,14 +20,36 @@ import { ToastContainer } from "react-toastify";
 import ProtectedRoute from './Pages/ProtectedRoute'
 import Register from './Pages/Register'
 import AdminDashboard from './Pages/AdminDashboard'
+import OfferPopup from './Components/OfferPopup'
+import { useEffect } from 'react'
+
 
 
 
 
 function App() {
 
+
+  useEffect(() => {
+  const popupShown = localStorage.getItem("offerPopupShown");
+
+  if (!popupShown) {
+    setTimeout(() => {
+      setIsOpen(true);
+    }, 1000);
+  }
+}, []);
+
+const closePopup = () => {
+  localStorage.setItem("offerPopupShown", "true");
+  setIsOpen(false);
+};
+
+
+
   return (
     <>
+    <OfferPopup onClick={closePopup}/>
       <Header />
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <ScrollToTop />
