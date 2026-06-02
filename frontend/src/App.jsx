@@ -21,15 +21,14 @@ import ProtectedRoute from './Pages/ProtectedRoute'
 import Register from './Pages/Register'
 import AdminDashboard from './Pages/AdminDashboard'
 import OfferPopup from './Components/OfferPopup'
-import { useEffect } from 'react'
-
+import {useState, useEffect } from 'react'
+import Finance from './Components/Finance'
 
 
 
 
 function App() {
-
-
+const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
   const popupShown = localStorage.getItem("offerPopupShown");
 
@@ -68,6 +67,7 @@ const closePopup = () => {
         <Route path="/update-profile/:id" element={<ProtectedRoute><CreateProfile mode="update" /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
          <Route path="/register" element={<Register/>} />
+         <Route path="/admin/membership" element={<ProtectedRoute><Finance/></ProtectedRoute>} />
       </Routes>
 
       <Footer />

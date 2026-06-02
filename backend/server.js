@@ -5,6 +5,7 @@ const db = require('./config/db')
 const cors = require('cors')
 const profileRoute = require('./routes/profileRoute')
 const userRoute = require('./routes/userRoute')
+const financeRoute = require('./routes/financeRoute')
 const cookieParser = require('cookie-parser');
 const path = require("path");
 const { siteMap } = require('./controllers/siteMap');
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, "dist")));
 
 app.use("/api/profile", profileRoute);
 app.use("/api/user",userRoute);
+app.use("/api/finance",financeRoute);
 
 
 // Site Map 

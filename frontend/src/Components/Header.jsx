@@ -49,6 +49,10 @@ const Header = () => {
               {
                 user?.role === "admin" && (<Link to="/admin/dashboard" className="hover:text-red-600">Dashboard</Link>)
               }
+              {
+                user?.role === "admin" && (<Link to="/admin/membership" onClick={closeMenu}
+                  className="hover:text-red-600">Add Membership</Link>)
+              }
 
               <Link to="/browse-profile" className="hover:text-red-600">Browse Profile</Link>
 
@@ -121,7 +125,12 @@ const Header = () => {
 
           {
             user?.role === "admin" && (<Link to="/admin/dashboard" onClick={closeMenu}
- className="hover:text-red-600">Dashboard</Link>)
+              className="hover:text-red-600">Dashboard</Link>)
+          }
+
+          {
+            user?.role === "admin" && (<Link to="/admin/membership" onClick={closeMenu}
+              className="hover:text-red-600">Add Membership</Link>)
           }
           {/* Auth Buttons Mobile */}
           {user ? (
