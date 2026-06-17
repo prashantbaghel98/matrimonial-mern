@@ -14,6 +14,7 @@ const ProfileDetails = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
+  const [showDownloadOptions, setShowDownloadOptions] = useState(false);
 
 
 
@@ -93,48 +94,51 @@ ${frontendUrl}
   }, [id]);
 
   // ✅ FINAL PDF FUNCTION (NO UI CHANGE)
-  const downloadPDF = async () => {
+  const downloadImage = async () => {
     const original = document.getElementById("pdf-content");
 
-    // 🔥 Clone element (hidden)
+    
+
     const clone = original.cloneNode(true);
+
     clone.style.position = "fixed";
     clone.style.top = "-9999px";
     clone.style.left = "0";
     clone.style.padding = "30px";
     clone.style.width = "800px";
-    clone.style.background = "#ffffff";
+    clone.style.background = "#ffffff"; 
     clone.style.boxSizing = "border-box";
 
     document.body.appendChild(clone);
-
-    // 🔥 Fix badge only for PDF
+  
     const badges = clone.querySelectorAll("[data-badge]");
-    badges.forEach((el) => {
-      el.style.paddingBottom = "15px";
-    });
+
+badges.forEach((el) => {
+  el.style.paddingBottom = "10px";
+});
 
     await new Promise((r) => setTimeout(r, 200));
 
     const canvas = await html2canvas(clone, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       backgroundColor: "#ffffff",
     });
 
-    const imgData = canvas.toDataURL("image/png");
+    const image = canvas.toDataURL(
+      "image/jpeg",
+      1.0
+    );
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const link = document.createElement("a");
 
-    const pdfWidth = 210;
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    link.href = image;
+    link.download = `${profile.name}-biodata.jpg`;
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    pdf.save(`${profile.name}-biodata.pdf`);
-
-    // 🧹 cleanup
     document.body.removeChild(clone);
   };
 
@@ -197,9 +201,12 @@ ${frontendUrl}
           <button onClick={() => navigate(-1)} style={styles.btn}>
             ← Back
           </button>
-          <button onClick={downloadPDF} style={styles.downloadBtn}>
-            Download PDF
-          </button>
+<button
+  onClick={downloadImage}
+  style={styles.downloadBtn}
+>
+  Download
+</button>
 
 
           <button
@@ -381,7 +388,7 @@ const styles = {
   badge: {
     background: "#e5e7eb",
     padding: "0 16px",
-    height: "32px",
+    height: "35px",
     borderRadius: "20px",
     fontSize: "13px",
     display: "inline-flex",
@@ -476,6 +483,15 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  },
+  optionBtn: {
+    display: "block",
+    width: "100%",
+    padding: "10px 16px",
+    border: "none",
+    background: "#fff",
+    cursor: "pointer",
+    textAlign: "left",
   },
 };
 
