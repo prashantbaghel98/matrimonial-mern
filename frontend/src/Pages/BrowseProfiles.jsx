@@ -36,6 +36,21 @@ const BrowseProfiles = () => {
   };
 
 
+
+// Same Profile Open When Back 
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem(
+      "browseScrollPosition"
+    );
+
+    if (savedPosition) {
+      setTimeout(() => {
+        window.scrollTo(0, Number(savedPosition));
+      }, 100);
+    }
+  }, [profiles]);
+
+
   // Fetch Profiles
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -365,16 +380,21 @@ const BrowseProfiles = () => {
               <div className="flex flex-col gap-2">
 
                 <button
-                  onClick={() =>
-                    navigate(`/browse-profile/${profile._id}`)
-                  }
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      "browseScrollPosition",
+                      window.scrollY
+                    );
+
+                    navigate(`/browse-profile/${profile._id}`);
+                  }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
                 >
                   <FileText size={16} />
                   View Full Biodata
                 </button>
 
-                {user?.role ==='admin' && (
+                {user?.role === 'admin' && (
 
                   <div className="flex gap-2 mt-2">
 
@@ -432,11 +452,10 @@ const BrowseProfiles = () => {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 rounded-lg border ${
-                currentPage === page
-                  ? "bg-red-500 text-white"
-                  : "bg-white"
-              }`}
+              className={`px-4 py-2 rounded-lg border ${currentPage === page
+                ? "bg-red-500 text-white"
+                : "bg-white"
+                }`}
             >
               {page}
             </button>

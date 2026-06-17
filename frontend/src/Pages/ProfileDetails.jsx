@@ -30,13 +30,13 @@ const ProfileDetails = () => {
 
   };
 
-const handleShare = async () => {
+  const handleShare = async () => {
 
 
-  const frontendUrl =
-  `https://apnavivah.in/browse-profile/${profile._id}`;
+    const frontendUrl =
+      `https://apnavivah.in/browse-profile/${profile._id}`;
 
-  const shareText = `*Apna Vivah New Biodata*
+    const shareText = `*Apna Vivah New Biodata*
 
 👤 *Name:* ${capitalize(profile.name)}
 💼 *Occupation:* ${capitalize(profile.occupation)}
@@ -48,37 +48,37 @@ const handleShare = async () => {
 ${frontendUrl}
 `;
 
-  if (navigator.share) {
+    if (navigator.share) {
 
-    try {
+      try {
 
-      await navigator.share({
+        await navigator.share({
 
-        title: `${profile.name} Biodata`,
-        text: shareText,
+          title: `${profile.name} Biodata`,
+          text: shareText,
 
-      });
+        });
 
-    } catch (error) {
+      } catch (error) {
 
-      console.log(error);
+        console.log(error);
+
+      }
 
     }
 
-  }
+    else {
 
-  else {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(
+          shareText + "\n" + shareUrl
+        )}`,
+        "_blank"
+      );
 
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(
-        shareText + "\n" + shareUrl
-      )}`,
-      "_blank"
-    );
+    }
 
-  }
-
-};
+  };
 
 
 
@@ -194,7 +194,7 @@ ${frontendUrl}
       <div style={styles.page} className="bioPage">
         {/* Buttons */}
         <div style={styles.buttonWrapper}>
-          <button onClick={() => navigate("/browse-profile")} style={styles.btn}>
+          <button onClick={() => navigate(-1)} style={styles.btn}>
             ← Back
           </button>
           <button onClick={downloadPDF} style={styles.downloadBtn}>
@@ -291,7 +291,7 @@ ${frontendUrl}
 
           <Section title="Family Details" icon={<Users size={16} />}>
             <Grid>
-              <Item label="Father" value={profile.fatherName} />
+              <Item style={{ margin: 0, textTransform: "capitalize" }} label="Father" value={profile.fatherName?.charAt(0).toUpperCase() + profile.fatherName?.slice(1)} />
               <Item label="Father Occupation" value={profile.fatherOccupation} />
               <Item label="Mother" value={profile.motherName} />
               <Item label="Mother Occupation" value={profile.motherOccupation} />
