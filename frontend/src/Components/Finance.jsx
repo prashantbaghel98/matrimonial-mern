@@ -192,7 +192,7 @@ const Finance = () => {
           <button
             onClick={() => setActiveTab("members")}
             className={`w-full flex items-center gap-3 p-4 rounded-2xl transition ${activeTab === "members"
-              ? "bg-violet-600"
+              ? "bg-red-600"
               : "hover:bg-slate-800"
               }`}
           >
@@ -213,7 +213,7 @@ const Finance = () => {
               setActiveTab("add");
             }}
             className={`w-full flex items-center gap-3 p-4 rounded-2xl transition ${activeTab === "add"
-              ? "bg-violet-600"
+              ? "bg-red-600"
               : "hover:bg-slate-800"
               }`}
           >
@@ -229,7 +229,7 @@ const Finance = () => {
 
       <div className="flex-1 pt-25 p-6">
 
-        <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 rounded-[35px] p-8 text-white mb-8 shadow-xl">
+        <div className="bg-gradient-to-r from-red-600 via-red-700 to-pink-600 rounded-[35px] p-8 text-white mb-8 shadow-xl">
           <h1 className="text-4xl font-bold">
             Membership Dashboard
           </h1>
@@ -257,7 +257,7 @@ const Finance = () => {
 
               <div className="bg-white p-6 rounded-3xl shadow-lg">
                 <IndianRupee />
-                <h2 className="text-4xl font-bold mt-3 text-green-600">
+                <h2 className="text-4xl font-bold mt-3">
                   ₹{totalRevenue}
                 </h2>
                 <p className="text-gray-500">
@@ -265,9 +265,9 @@ const Finance = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl shadow-lg">
+              <div className="bg-white p-6 rounded-3xl shadow-lg ">
                 <Users />
-                <h2 className="text-4xl font-bold mt-3 text-blue-600">
+                <h2 className="text-4xl font-bold mt-3 ">
                   {activeMembers}
                 </h2>
                 <p className="text-gray-500">
@@ -277,7 +277,7 @@ const Finance = () => {
 
                <div className="bg-white p-6 rounded-3xl shadow-lg">
                 <Users />
-                <h2 className="text-4xl font-bold mt-3 text-blue-600">
+                <h2 className="text-4xl font-bold mt-3">
                   {expiredMembers}
                 </h2>
                 <p className="text-gray-500">
@@ -330,7 +330,7 @@ const Finance = () => {
                       {item.expiryDate &&
                         new Date(item.expiryDate) > new Date()
                         ? "Active"
-                        : "Plan Expired"}
+                        : "Inactive"}
                     </span>
                   </div>
 
@@ -341,7 +341,7 @@ const Finance = () => {
                         Plan
                       </p>
 
-                      <p className="font-semibold">
+                      <p className="font-semibold ">
                         {item.planDuration}
                       </p>
                     </div>
@@ -351,7 +351,7 @@ const Finance = () => {
                         Amount
                       </p>
 
-                      <p className="font-semibold text-green-600">
+                      <p className="font-semibold ">
                         ₹{item.amount}
                       </p>
                     </div>
@@ -361,7 +361,7 @@ const Finance = () => {
 
                     <button
                       onClick={() => handleEdit(item)}
-                      className="flex-1 h-11 rounded-xl bg-blue-50 text-blue-600"
+                      className="flex-1 h-11 rounded-xl bg-blue-50"
                     >
                       <Edit
                         size={16}
@@ -473,7 +473,7 @@ const Finance = () => {
                 className="h-14 px-4 border rounded-2xl"
               />
 
-              <button className="h-14 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold">
+              <button className="h-14 rounded-2xl bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold">
                 {editId
                   ? "Update Membership"
                   : "Create Membership"}

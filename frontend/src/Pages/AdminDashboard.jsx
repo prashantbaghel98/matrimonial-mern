@@ -233,7 +233,7 @@ const AdminDashboard = () => {
 
           <aside className="sm:w-[40%] lg:col-span-3">
 
-            <div className="bg-white  rounded-3xl shadow-sm p-6 lg:sticky lg:top-24">
+            <div className="bg-white rounded-3xl shadow-sm p-6 lg:sticky lg:top-24">
 
               {/* ADMIN INFO */}
 
@@ -257,7 +257,7 @@ const AdminDashboard = () => {
                   @{user?.username}
                 </p>
 
-                <div className="mt-4 inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium">
+                <div className="mt-4 inline-flex items-center gap-2 bg-blue-50 text-red-600 px-4 py-2 rounded-full text-sm font-medium">
 
                   <ShieldCheck size={16} />
 
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
                   }
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition ${
                     activeTab === "dashboard"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-red-600 text-white"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -291,7 +291,7 @@ const AdminDashboard = () => {
                   }
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition ${
                     activeTab === "biodata"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-red-600 text-white"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -305,7 +305,7 @@ const AdminDashboard = () => {
                   }
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition ${
                     activeTab === "create"
-                      ? "bg-blue-600 text-white"
+                      ? "bg-red-600 text-white"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -333,7 +333,7 @@ const AdminDashboard = () => {
 
               <>
 
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl mt-5 md:-mt-0 p-6 md:p-8 text-white shadow-lg">
+                <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-3xl mt-5 md:-mt-0 p-6 md:p-8 text-white shadow-lg">
 
                   <h1 className="text-3xl md:text-4xl font-bold">
                     Admin Dashboard

@@ -9,6 +9,7 @@ const BrowseProfiles = () => {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
 
+  const [selectedImage, setSelectedImage] = useState(null);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -310,13 +311,19 @@ const BrowseProfiles = () => {
           >
 
             <img
-              src={
-                profile.photo ||
-                "https://via.placeholder.com/300x400"
-              }
-              alt={profile.name}
-              className="w-full h-[400px] object-cover object-top"
-            />
+  src={
+    profile.photo ||
+    "https://via.placeholder.com/300x400"
+  }
+  alt={profile.name}
+  className="w-full h-[400px] object-cover object-top cursor-pointer hover:opacity-90 transition"
+  onClick={() =>
+    setSelectedImage(
+      profile.photo ||
+      "https://via.placeholder.com/300x400"
+    )
+  }
+/>
 
             <div className="p-4">
 
@@ -475,6 +482,32 @@ const BrowseProfiles = () => {
 
       </div>
 
+
+
+
+{/* Image Preview Modal */}
+{selectedImage && (
+  <div
+    className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
+    onClick={() => setSelectedImage(null)}
+  >
+    {/* Close Button */}
+    <button
+      onClick={() => setSelectedImage(null)}
+      className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+    >
+      ✕ Close
+    </button>
+
+    {/* Image */}
+    <img
+      src={selectedImage}
+      alt="Profile Preview"
+      onClick={(e) => e.stopPropagation()}
+      className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+    />
+  </div>
+)}
     </section>
   );
 };
