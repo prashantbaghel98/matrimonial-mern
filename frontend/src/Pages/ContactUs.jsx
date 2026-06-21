@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Phone,
@@ -7,10 +8,17 @@ import {
   MessageCircle,
   ArrowRight,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const WHATSAPP_NUMBER = "917017225698"; // replace
+const WHATSAPP_NUMBER = "917017225698";
 
 const ContactUs = () => {
+  const { t } = useTranslation();
+
+  const contactMethods = t("contact.contactMethods", {
+    returnObjects: true,
+  });
+
   const openWhatsApp = (message) => {
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
       message
@@ -21,25 +29,22 @@ const ContactUs = () => {
   return (
     <div className="w-full bg-[#f5f1eb] text-[#2d2a26]">
 
-      {/* ================= HERO ================= */}
+      {/* Hero */}
       <section className="text-center py-24 bg-[#e9e2d8] px-6">
         <p className="text-orange-600 uppercase text-sm font-semibold mb-3">
-          Contact Us
+          {t("contact.pageTitle")}
         </p>
 
         <h1 className="text-4xl sm:text-5xl font-bold">
-          We're Here to{" "}
-          <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
-            Help You
-          </span>
+          {t("contact.hero.title")}
         </h1>
 
         <p className="mt-6 text-gray-600 max-w-2xl mx-auto">
-          Have questions about our matrimonial services? Reach out to us directly via WhatsApp for the fastest response.
+          {t("contact.hero.description")}
         </p>
       </section>
 
-      {/* ================= WHATSAPP CARD ================= */}
+      {/* WhatsApp Card */}
       <section className="max-w-5xl mx-auto px-6 py-16">
         <div className="bg-green-50 border border-green-400 rounded-3xl p-12 text-center shadow-md">
 
@@ -48,97 +53,110 @@ const ContactUs = () => {
           </div>
 
           <h2 className="text-xl font-semibold mb-3">
-            WhatsApp - Fastest Way to Connect
+            {contactMethods[0].title}
           </h2>
 
           <p className="text-gray-600 mb-8">
-            Click below to instantly message us on WhatsApp. We typically respond within minutes!
+            {t("contact.hero.description")}
           </p>
 
           <button
             onClick={() =>
-              openWhatsApp("Hello Apna Vivah Team, I would like to know more about your services.")
+              openWhatsApp(
+                "Hello Apna Vivah Team, I would like to know more about your services."
+              )
             }
             className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-3 rounded-xl font-semibold hover:scale-105 transition"
           >
-            Chat on WhatsApp
+            {contactMethods[0].button}
             <ArrowRight size={18} />
           </button>
         </div>
       </section>
 
-      {/* ================= CONTACT CARDS ================= */}
+      {/* Contact Cards */}
       <section className="max-w-6xl mx-auto px-6 pb-24 grid md:grid-cols-3 gap-8">
 
-        {/* Call */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#e6ddd4] hover:shadow-lg transition">
           <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
             <Phone className="text-orange-600" />
           </div>
-          <h3 className="font-semibold mb-2">Call Us</h3>
-          <p className="text-gray-500 text-sm mb-3">
-            Prefer talking? Give us a call directly.
+
+          <h3 className="font-semibold mb-2">
+            {contactMethods[1].title}
+          </h3>
+
+          <p className="text-orange-600 font-medium">
+            {contactMethods[1].value}
           </p>
-          <p className="text-orange-600 font-medium">+91 7017225698</p>
         </div>
 
-        {/* Email */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#e6ddd4] hover:shadow-lg transition">
           <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
             <Mail className="text-orange-600" />
           </div>
-          <h3 className="font-semibold mb-2">Email Us</h3>
-          <p className="text-gray-500 text-sm mb-3">
-            Send us detailed inquiries via email.
+
+          <h3 className="font-semibold mb-2">
+            {contactMethods[2].title}
+          </h3>
+
+          <p className="text-orange-600 font-medium">
+            {contactMethods[2].value}
           </p>
-          <p className="text-orange-600 font-medium">contact@apnavivah.com</p>
         </div>
 
-        {/* Hours */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#e6ddd4] hover:shadow-lg transition">
           <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
             <Clock className="text-orange-600" />
           </div>
-          <h3 className="font-semibold mb-2">Available Hours</h3>
-          <p className="text-gray-500 text-sm mb-3">
-            We're here to help you.
+
+          <h3 className="font-semibold mb-2">
+            {t("contact.availableHours")}
+          </h3>
+
+          <p className="font-medium">
+{t("contact.workingHours")}
           </p>
-          <p className="font-medium">Mon - Sun: 9AM - 9PM</p>
         </div>
 
       </section>
 
-      {/* ================= FOUNDER SECTION ================= */}
+      {/* Founder */}
       <section className="bg-[#e9e2d8] py-24 px-6">
         <div className="max-w-4xl mx-auto bg-white rounded-3xl p-10 shadow-md border border-[#e6ddd4]">
 
           <div className="flex flex-col sm:flex-row items-center gap-8">
 
-            <div className="sm:w-54 sm:h-34 rounded-full flex items-center justify-center text-2xl font-bold text-orange-600">
-              <img src="./founder.png" alt="" className="rounded-2xl" />
+            <div className="sm:w-54 sm:h-34">
+              <img
+                src="/founder.png"
+                alt="Founder"
+                className="rounded-2xl"
+              />
             </div>
 
             <div>
               <h3 className="text-xl font-semibold">
-                Vinod Kumar Baghel
+                {t("contact.founder.name")}
               </h3>
+
               <p className="text-orange-600 text-sm mb-3">
-                Founder & Personal Manager
+                {t("contact.founder.designation")}
               </p>
 
               <p className="text-gray-600 mb-6">
-                With over 10 years of experience in community matrimonial services,
-                I personally oversee every match and ensure that families find
-                the perfect connection. Your trust is my priority.
+                {t("contact.founder.description")}
               </p>
 
               <button
                 onClick={() =>
-                  openWhatsApp("Hello Vinod Ji, I would like to discuss about matrimonial services.")
+                  openWhatsApp(
+                    "Hello Vinod Ji, I would like to discuss matrimonial services."
+                  )
                 }
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-2 rounded-xl font-semibold hover:scale-105 transition"
               >
-                Message Vinod Ji
+                {t("contact.founder.button")}
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -147,28 +165,29 @@ const ContactUs = () => {
         </div>
       </section>
 
-      {/* ================= LOCATION ================= */}
+      {/* Location */}
       <section className="text-center py-24 px-6">
+
         <div className="w-16 h-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-6">
           <MapPin className="text-orange-600" />
         </div>
 
         <h2 className="text-2xl font-semibold mb-2">
-          Our Location
+          {t("contact.location.title")}
         </h2>
 
         <p className="text-gray-600 mb-3">
-          Serving communities across
+          {t("contact.location.subtitle")}
         </p>
 
         <p className="font-medium text-lg mb-4">
-          Ghaziabad, India
+          {t("contact.location.city")}
         </p>
 
         <p className="text-gray-500 max-w-xl mx-auto">
-          We operate primarily online through WhatsApp for your convenience.
-          Home visits can be arranged for premium members.
+          {t("contact.location.description")}
         </p>
+
       </section>
 
     </div>

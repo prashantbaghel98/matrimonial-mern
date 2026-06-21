@@ -1,10 +1,12 @@
 import React from "react";
 import { Heart, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 
 const CallToAction = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <section className="relative w-full bg-[#f3ede5] py-24 overflow-hidden">
 
@@ -14,25 +16,17 @@ const CallToAction = () => {
 
       <div className="relative max-w-4xl mx-auto px-6 text-center">
 
-        {/* Icon */}
-        {/* <div className="w-20 h-20 mx-auto mb-8 rounded-full 
-                        bg-white shadow-lg flex items-center justify-center
-                        animate-pulse">
-          <Heart className="text-orange-600" size={36} />
-        </div> */}
-
         {/* Heading */}
         <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2a26] leading-tight">
-          Ready to Find Your{" "}
+          {t("home.cta.title1")}{" "}
           <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
-            Life Partner?
+            {t("home.cta.title2")}
           </span>
         </h2>
 
         {/* Description */}
         <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Join thousands of happy families from Pal, Baghel, and Dhangar communities.
-          Register today and take the first step towards your perfect match.
+          {t("home.cta.description")}
         </p>
 
         {/* Buttons */}
@@ -44,7 +38,7 @@ const CallToAction = () => {
                              transition duration-300">
 
             <span className="flex items-center gap-3"><a target="blank" href="https://wa.me/917017225698?text=Hello%20Apna%20Vivah,%20I%20want%20to%20register%20for%20free.%20Please%20guide%20me.
-">            Register Free on WhatsApp</a>
+">            {t("home.cta.button1")}</a>
               <ArrowRight className="group-hover:translate-x-2 transition" size={18} />
             </span>
           </button>
@@ -53,14 +47,14 @@ const CallToAction = () => {
                              border-2 border-orange-500 text-orange-600
                              hover:bg-orange-500 hover:text-white
                              transition duration-300">
-            Contact Us
+            {t("home.cta.button2")}
           </button>
 
         </div>
 
         {/* Bottom Info */}
         <p className="mt-8 text-sm text-gray-500">
-          Free registration • No hidden charges • 100% verified profiles
+          {t("home.cta.features")}
         </p>
 
       </div>

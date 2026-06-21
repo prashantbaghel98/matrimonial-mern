@@ -1,0 +1,434 @@
+{
+    "site": {
+        "name": "Apna Vivah",
+        "phone": "+91 7017225698",
+        "email": "contact@apnavivah.com",
+        "address": "Ghaziabad, Uttar Pradesh, India",
+        "developer": "Worldtricks4u",
+        "managedBy": "Vinod Kumar Baghel"
+    },
+    "navbar": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "browseProfile": "Browse Profile",
+        "createProfile": "Create Profile",
+        "about": "About",
+        "membership": "Membership",
+        "successStories": "Success Stories",
+        "contact": "Contact",
+        "login": "Login",
+        "logout": "Logout",
+        "menu": "Menu"
+    },
+    "home": {
+        "hero": {
+            "badge": "Trusted by 1000+ Families",
+            "title1": "Find Your Perfect",
+            "title2": "Life ",
+            "title3": "Partner",
+            "title4": "with",
+            "title5": "Apna Vivah",
+            "description": "A trusted matrimonial platform exclusively for Pal, Baghel, and Dhangar communities. We bring families together through shared values, traditions, and trust.",
+            "registerButton": "Register Free",
+            "planButton": "View Plans",
+            "verifiedProfiles": "100% Verified Profiles",
+            "activeMembers": "5000+ Active Members"
+        },
+        "whyChooseUs": {
+            "badge": "Why Choose Us",
+            "title": "Why ShubhVivah Matrimony?",
+            "subtitle": "We understand the traditions, values, and expectations of our communities.",
+            "items": [
+                {
+                    "title": "Verified Profiles",
+                    "description": "Every profile is carefully reviewed to ensure authenticity and genuine matrimonial intent."
+                },
+                {
+                    "title": "Safe & Trusted",
+                    "description": "Your privacy matters to us. All information is handled with complete confidentiality and care."
+                },
+                {
+                    "title": "Community Focused",
+                    "description": "Dedicated exclusively to Pal, Baghel, and Dhangar communities to help families find suitable matches."
+                },
+                {
+                    "title": "Easy WhatsApp Support",
+                    "description": "Get quick assistance through WhatsApp whenever you need help."
+                }
+            ]
+        },
+        "howItWorks": {
+            "badge": "Simple Process",
+            "title": "How It Works",
+            "subtitle": "Finding your life partner is simple and hassle-free.",
+            "steps": [
+                {
+                    "number": "1",
+                    "title": "Register Your Profile",
+                    "description": "Chat with us on WhatsApp and share your details. We'll create your profile for free — no forms, no hassle."
+                },
+                {
+                    "number": "2",
+                    "title": "Browse Profiles",
+                    "description": "Explore hundreds of verified matrimonial profiles from the Dhangar, Baghel & Pal community."
+                },
+                {
+                    "number": "3",
+                    "title": "Connect via WhatsApp",
+                    "description": "Found someone interesting? Connect directly through WhatsApp and let families get acquainted."
+                }
+            ],
+            "button": "Chat on WhatsApp"
+        },
+        "successStories": {
+            "badge": "Success Stories",
+            "title": "Happy Couples, Happy Families",
+            "subtitle": "Real stories from happy couples who found their perfect match through Apna Vivah.",
+            "stories": [
+                {
+                    "name": "Rajesh & Sunita Dhangar",
+                    "community": "Dhangar · Married 2022",
+                    "text": "ShubhVivah helped us find each other through a simple WhatsApp conversation. The process was transparent and smooth. Truly a blessing!",
+                    "initials": "RS"
+                },
+                {
+                    "name": "Amit & Rekha Baghel",
+                    "community": "Baghel · Married 2023",
+                    "text": "Everything felt genuine and verified. Our families connected instantly.",
+                    "initials": "AR"
+                },
+                {
+                    "name": "Suresh & Meena Pal",
+                    "community": "Pal · Married 2023",
+                    "text": "Within 3 months we found our soulmate. Highly recommended.",
+                    "initials": "SM"
+                },
+                {
+                    "name": "Vikas & Pooja",
+                    "community": "Dhangar · Married 2024",
+                    "text": "Safe, simple and community focused experience.",
+                    "initials": "VP"
+                },
+                {
+                    "name": "Rohit & Anjali",
+                    "community": "Baghel · Married 2022",
+                    "text": "Profiles were verified and authentic.",
+                    "initials": "RA"
+                },
+                {
+                    "name": "Deepak & Kavita",
+                    "community": "Pal · Married 2023",
+                    "text": "Families connected comfortably through WhatsApp.",
+                    "initials": "DK"
+                },
+                {
+                    "name": "Mahesh & Ritu",
+                    "community": "Dhangar · Married 2024",
+                    "text": "Trustworthy service with genuine profiles.",
+                    "initials": "MR"
+                },
+                {
+                    "name": "Nitin & Shalini",
+                    "community": "Baghel · Married 2022",
+                    "text": "We found our match faster than expected.",
+                    "initials": "NS"
+                },
+                {
+                    "name": "Karan & Sneha",
+                    "community": "Pal · Married 2023",
+                    "text": "Respectful communication and strong community values.",
+                    "initials": "KS"
+                },
+                {
+                    "name": "Arjun & Priya",
+                    "community": "Dhangar · Married 2024",
+                    "text": "Reliable and community-centered matrimony service.",
+                    "initials": "AP"
+                }
+            ]
+        },
+        "cta": {
+            "title1": "Ready to Find Your ",
+            "title2": "Life Partner?",
+            "description": "Join thousands of happy families from Pal, Baghel, and Dhangar communities. Register today and take the first step towards your perfect match.",
+            "button1": "Register Free on WhatsApp",
+            "button2": "Contact Us",
+            "features": "Free registration • No hidden charges • 100% verified profiles"
+        }
+    },
+    "about": {
+        "pageTitle": "About Us",
+        "hero": {
+            "title": "Building Families with Trust & Tradition",
+            "description": "Apna Vivah is a dedicated matrimonial platform serving the Pal, Baghel, and Dhangar communities with personalized matchmaking services."
+        },
+        "ourStory": {
+            "title": "Our Story",
+            "subtitle": "A Vision for Community Matrimony",
+            "description1": "Apna Vivah was founded with a simple yet powerful vision.",
+            "description2": "Under the leadership of Vinod Kumar Baghel, we have successfully connected hundreds of families.",
+            "description3": "We believe every marriage is unique.",
+            "founder": {
+                "name": "Vinod Kumar Baghel",
+                "designation": "Founder & Director"
+            }
+        },
+        "values": {
+            "title": "Our Values",
+            "subtitle": "What We Stand For",
+            "items": [
+                {
+                    "title": "Trust",
+                    "description": "Building relationships based on transparency, honesty, and mutual respect."
+                },
+                {
+                    "title": "Community",
+                    "description": "Serving our communities with dedication, care, and understanding."
+                },
+                {
+                    "title": "Commitment",
+                    "description": "Going above and beyond to help families find the right life partner."
+                },
+                {
+                    "title": "Excellence",
+                    "description": "Maintaining high standards of service and professionalism."
+                }
+            ]
+        },
+        "communities": {
+            "title": "Our Communities",
+            "subtitle": "Proudly Serving",
+            "description": "We exclusively serve these vibrant communities with deep understanding of their traditions.",
+            "items": [
+                {
+                    "name": "Pal Community",
+                    "description": "Dedicated matchmaking services"
+                },
+                {
+                    "name": "Baghel Community",
+                    "description": "Dedicated matchmaking services."
+                },
+                {
+                    "name": "Dhangar Community",
+                    "description": "Dedicated matchmaking services"
+                }
+            ],
+            "cta": {
+                "title": "Ready to Start Your Journey?",
+                "description": "Connect with us today and let us help you find your perfect life partner."
+            }
+        }
+    },
+    "membership": {
+        "pageTitle": "Membership Plans",
+        "hero": {
+            "title": "Choose Your Perfect Plan",
+            "description": "Flexible membership options designed to help you find your life partner."
+        },
+        "plans": [
+            {
+                "name": "Basic",
+                "duration": "3 Months",
+                "price": "₹1999",
+                "features": [
+                    "Verified Profiles Access",
+                    "Community Specific Matches",
+                    "WhatsApp Support",
+                    "Limited Profile Views"
+                ]
+            },
+            {
+                "name": "Premium",
+                "duration": "6 Months",
+                "price": "₹2999",
+                "badge": "Most Popular",
+                "features": [
+                    "Unlimited Profile Views",
+                    "Priority Match Suggestions",
+                    "Direct WhatsApp Connection",
+                    "Profile Highlight",
+                    "Profile Highlight"
+                ]
+            },
+            {
+                "name": "Elite",
+                "duration": "12 Months",
+                "price": "₹3999",
+                "features": [
+                    "All Premium Features",
+                    "Dedicated Relationship Manager",
+                    "Top Search Placement",
+                    "Early Access to New Profiles",
+                    "VIP WhatsApp Assistance"
+                ]
+            }
+        ],
+        "helpCTA": {
+            "title": "Need Help Choosing?",
+            "description": "Contact us directly and we'll recommend the best plan for your needs.",
+            "button": "Chat with Us"
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "items": [
+                {
+                    "question": "How do I register?",
+                    "answer": "Simply choose a membership plan and contact us on WhatsApp. Our team will guide you through the complete registration process and help create your profile."
+                },
+                {
+                    "question": "Are all profiles verified?",
+                    "answer": "Yes, every profile is manually reviewed and verified before being published on the platform to ensure authenticity and trust."
+                },
+                {
+                    "question": "Can I upgrade my plan later?",
+                    "answer": "Absolutely. You can upgrade your membership plan at any time by contacting our support team on WhatsApp."
+                },
+                {
+                    "question": "What payment methods do you accept?",
+                    "answer": "We accept UPI, Google Pay, PhonePe, Paytm, bank transfers, and other secure digital payment methods."
+                }
+            ]
+        }
+    },
+    "contact": {
+        "pageTitle": "Contact Us",
+        "hero": {
+            "title": "We're Here to Help You",
+            "description": "Have questions about our matrimonial services?"
+        },
+        "contactMethods": [
+            {
+                "title": "WhatsApp",
+                "value": "+91 7017225698",
+                "button": "Chat on WhatsApp"
+            },
+            {
+                "title": "Call Us",
+                "value": "+91 7017225698"
+            },
+            {
+                "title": "Email Us",
+                "value": "contact@apnavivah.com"
+            }
+        ],
+        "availableHours": "Available Hours",
+        "workingHours": "Mon - Sun : 9AM - 9PM",
+        "founder": {
+            "name": "Vinod Kumar Baghel",
+            "designation": "Founder & Personal Manager",
+            "description": "With over 10 years of experience in community matrimonial services, I personally oversee every match and ensure that families find the perfect connection. Your trust is my priority.",
+            "button": "Message Vinod Ji"
+        },
+        "location": {
+            "title": "Our Location",
+            "subtitle": "Serving communities across",
+            "city": "Ghaziabad, India",
+            "description": "We operate primarily online through WhatsApp for your convenience. Home visits can be arranged for premium members."
+        }
+    },
+    "successStoriesPage": {
+        "pageTitle": "Success Stories",
+        "hero": {
+            "title": "Real Love, Real Happy Endings",
+            "description": "These beautiful couples found their life partners through Apna Vivah."
+        },
+        "stories": [
+            {
+                "community": "Baghel Community",
+                "couple": "Rahul & Neha",
+                "location": "Indore, MP",
+                "story": "We both were looking for someone who understood our values and traditions. Apna Vivah connected us, and within three months, our families met. Today, we are happily married and grateful for this platform."
+            },
+            {
+                "community": "Pal Community",
+                "couple": "Vijay & Priyanka",
+                "location": "Bhopal, MP",
+                "story": "After searching for two years on other platforms, we found each other through Apna Vivah. The personal attention from Vinod Ji made all the difference."
+            },
+            {
+                "community": "Dhangar Community",
+                "couple": "Sunil & Meena",
+                "location": "Ujjain, MP",
+                "story": "What we loved about Apna Vivah was how they understood our community values. The matching was perfect."
+            },
+            {
+                "community": "Baghel Community",
+                "couple": "Deepak & Anita",
+                "location": "Gwalior, MP",
+                "story": "The premium membership was worth every rupee. We received personalized recommendations that truly matched our preferences."
+            },
+            {
+                "community": "Pal Community",
+                "couple": "Arun & Sunita",
+                "location": "Jabalpur, MP",
+                "story": "Our parents were worried about finding a suitable match. Apna Vivah's verification process gave them complete confidence."
+            },
+            {
+                "community": "Dhangar Community",
+                "couple": "Kiran & Rekha",
+                "location": "Ratlam, MP",
+                "story": "Quick, efficient, and trustworthy. Within weeks of registering, we found our perfect match."
+            }
+        ],
+        "statistics": [
+            {
+                "number": "500+",
+                "label": "Happy Marriages"
+            },
+            {
+                "number": "3",
+                "label": "Communities Served"
+            },
+            {
+                "number": "10+",
+                "label": "Years of Trust"
+            },
+            {
+                "number": "98%",
+                "label": "Success Rate"
+            }
+        ],
+        "cta": {
+            "title": "Your Story Could Be Next!",
+            "description": "Join Apna Vivah today and take the first step towards finding your perfect life partner.",
+            "button": "Start Your Journey"
+        }
+    },
+    "footer": {
+        "title": "Apna Vivah",
+        "description": "A trusted matrimonial platform exclusively for Pal, Baghel, and Dhangar communities. We build lasting relationships based on trust and tradition.",
+        "quickLinks": [
+            {
+                "label": "Home",
+                "path": "/"
+            },
+            {
+                "label": "About Us",
+                "path": "/about"
+            },
+            {
+                "label": "Membership Plans",
+                "path": "/membership"
+            },
+            {
+                "label": "Success Stories",
+                "path": "/success-stories"
+            },
+            {
+                "label": "Contact Us",
+                "path": "/contact"
+            }
+        ],
+        "communities": [
+            "Pal Community",
+            "Baghel Community",
+            "Dhangar Community"
+        ],
+        "contact": {
+            "phone": "+91 7017225698",
+            "email": "contact@apnavivah.com",
+            "address": "Ghaziabad, India"
+        },
+        "copyright": "© 2026 Apna Vivah. All Rights Reserved."
+    }
+}
