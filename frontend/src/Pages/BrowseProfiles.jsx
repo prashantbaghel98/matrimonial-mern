@@ -50,6 +50,44 @@ const BrowseProfiles = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  useEffect(() => {
+    const savedFilters = sessionStorage.getItem("browseFilters");
+
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+
+      setGender(filters.gender || "");
+      setCity(filters.city || "");
+      setMaritalStatus(filters.maritalStatus || "");
+      setAgeRange(filters.ageRange || "");
+      setIncomeRange(filters.incomeRange || "");
+      setCurrentPage(filters.currentPage || 1);
+    }
+  }, []);
+
+
+
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      "browseFilters",
+      JSON.stringify({
+        gender,
+        city,
+        maritalStatus,
+        ageRange,
+        incomeRange,
+        currentPage,
+      })
+    );
+  }, [
+    gender,
+    city,
+    maritalStatus,
+    ageRange,
+    incomeRange,
+    currentPage,
+  ]);
 
 
   // Same Profile Open When Back 
@@ -199,7 +237,7 @@ const BrowseProfiles = () => {
   return (
     <section className="min-h-screen py-10 max-w-7xl mx-auto  px-4 md:px-6">
 
-   
+
 
 
       {/* Header */}
@@ -375,6 +413,8 @@ const BrowseProfiles = () => {
                     setAgeRange("");
                     setIncomeRange("");
                     setMaritalStatus("");
+
+                    sessionStorage.removeItem("browseFilters");
                   }}
                   className="h-10 px-5 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center gap-2 text-sm font-medium transition"
                 >
