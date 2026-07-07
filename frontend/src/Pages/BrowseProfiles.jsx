@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
-import { FileText, Edit, Trash2 } from "lucide-react";
+import {
+  Filter,
+  X,
+  Search,
+  Users,
+  MapPin,
+  Calendar,
+  IndianRupee,
+  Heart,
+  RotateCcw,
+  FileText,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
@@ -24,6 +37,7 @@ const BrowseProfiles = () => {
   const [maritalStatus, setMaritalStatus] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [incomeRange, setIncomeRange] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Calculate Age
   const calculateAge = (dob) => {
@@ -38,7 +52,7 @@ const BrowseProfiles = () => {
 
 
 
-// Same Profile Open When Back 
+  // Same Profile Open When Back 
   useEffect(() => {
     const savedPosition = sessionStorage.getItem(
       "browseScrollPosition"
@@ -183,115 +197,206 @@ const BrowseProfiles = () => {
   }
 
   return (
-    <section className="bg-gray-50 min-h-screen py-20 px-4 md:px-6">
+    <section className="min-h-screen py-10 max-w-7xl mx-auto  px-4 md:px-6">
 
-      {/* Heading + Filters */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-10 gap-6">
+   
 
-        <h2 className="text-3xl font-bold text-gray-800">
-          Browse Matches
-        </h2>
 
-        {/* Filters */}
-        <div className="grid grid-cols-2 md:flex gap-3 w-full md:w-auto">
+      {/* Header */}
 
-          {/* Gender */}
-          <select
-            onChange={(e) => setGender(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white"
-          >
-            <option value="">Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+      <div className="flex justify-between items-center mb-8">
 
-          {/* City */}
-          <input
-            type="text"
-            placeholder="City"
-            onChange={(e) => setCity(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
-          />
+        <div>
 
-          {/* Age */}
-          <select
-            onChange={(e) => setAgeRange(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white"
-          >
-            <option value="">Age</option>
-            <option value="18-20">18 - 20</option>
-            <option value="21-25">21 - 25</option>
-            <option value="26-30">26 - 30</option>
-            <option value="31-35">31 - 35</option>
-            <option value="36-40">36 - 40</option>
-          </select>
+          <h2 className="text-2xl lg:text-3xl font-bold">
+            Browse Matches
+          </h2>
 
-          {/* Salary */}
-          <select
-            onChange={(e) => setIncomeRange(e.target.value)}
-            className="px-3 py-2 border rounded-lg bg-white"
-          >
-            <option value="">Salary</option>
-
-            <option value="200000-500000">
-              2LPA - 5LPA
-            </option>
-
-            <option value="600000-1000000">
-              6LPA - 10LPA
-            </option>
-
-            <option value="1100000-1500000">
-              11LPA - 15LPA
-            </option>
-
-            <option value="1600000-2000000">
-              16LPA - 20LPA
-            </option>
-
-            <option value="2100000-2500000">
-              21LPA - 25LPA
-            </option>
-
-            <option value="2600000-3000000">
-              26LPA - 30LPA
-            </option>
-
-          </select>
-
-          {/* Marital Status */}
-          <select
-            onChange={(e) =>
-              setMaritalStatus(e.target.value)
-            }
-            className="px-3 py-2 border rounded-lg bg-white"
-          >
-            <option value="">Marital Status</option>
-
-            <option value="Unmarried">
-              Unmarried
-            </option>
-
-            <option value="Married">
-              Married
-            </option>
-
-            <option value="Divorced">
-              Divorced
-            </option>
-
-            <option value="Widowed">
-              Widowed
-            </option>
-
-            <option value="Separated">
-              Separated
-            </option>
-
-          </select>
+          <p className="text-gray-500 mt-0">
+            {/* {filteredProfiles.length} Profiles Found */}
+          </p>
 
         </div>
+
+        <button
+          onClick={() => setShowFilters(true)}
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg transition"
+        >
+          <Filter size={20} />
+          Filters
+        </button>
+
       </div>
+
+
+      {/* Filter Popup */}
+
+      {showFilters && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Filter Profiles
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Find your perfect match
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowFilters(false)}
+                className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                {/* Gender */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Users size={16} />
+                    Gender
+                  </label>
+
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+
+                {/* City */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <MapPin size={16} />
+                    City
+                  </label>
+
+                  <div className="relative">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+
+                    <input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Search City"
+                      className="w-full h-10 rounded-lg border border-gray-300 pl-9 pr-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Age */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Calendar size={16} />
+                    Age
+                  </label>
+
+                  <select
+                    value={ageRange}
+                    onChange={(e) => setAgeRange(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  >
+                    <option value="">Select Age</option>
+                    <option value="18-20">18-20</option>
+                    <option value="21-25">21-25</option>
+                    <option value="26-30">26-30</option>
+                    <option value="31-35">31-35</option>
+                    <option value="36-40">36-40</option>
+                  </select>
+                </div>
+
+                {/* Salary */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <IndianRupee size={16} />
+                    Salary
+                  </label>
+
+                  <select
+                    value={incomeRange}
+                    onChange={(e) => setIncomeRange(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  >
+                    <option value="">Select Salary</option>
+                    <option value="200000-500000">2 LPA - 5 LPA</option>
+                    <option value="600000-1000000">6 LPA - 10 LPA</option>
+                    <option value="1100000-1500000">11 LPA - 15 LPA</option>
+                    <option value="1600000-2000000">16 LPA - 20 LPA</option>
+                    <option value="2100000-2500000">21 LPA - 25 LPA</option>
+                    <option value="2600000-3000000">26 LPA - 30 LPA</option>
+                  </select>
+                </div>
+
+                {/* Marital Status */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Heart size={16} />
+                    Marital Status
+                  </label>
+
+                  <select
+                    value={maritalStatus}
+                    onChange={(e) => setMaritalStatus(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Unmarried">Unmarried</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="Separated">Separated</option>
+                  </select>
+                </div>
+
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-3 mt-6 pt-5 border-t">
+
+                <button
+                  onClick={() => {
+                    setGender("");
+                    setCity("");
+                    setAgeRange("");
+                    setIncomeRange("");
+                    setMaritalStatus("");
+                  }}
+                  className="h-10 px-5 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center gap-2 text-sm font-medium transition"
+                >
+                  <RotateCcw size={16} />
+                  Reset
+                </button>
+
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="h-10 px-6 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-md transition"
+                >
+                  Apply Filters
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Empty */}
       {filteredProfiles.length === 0 && (
@@ -311,19 +416,19 @@ const BrowseProfiles = () => {
           >
 
             <img
-  src={
-    profile.photo ||
-    "https://via.placeholder.com/300x400"
-  }
-  alt={profile.name}
-  className="w-full h-[400px] object-cover object-top cursor-pointer hover:opacity-90 transition"
-  onClick={() =>
-    setSelectedImage(
-      profile.photo ||
-      "https://via.placeholder.com/300x400"
-    )
-  }
-/>
+              src={
+                profile.photo ||
+                "https://via.placeholder.com/300x400"
+              }
+              alt={profile.name}
+              className="w-full h-[300px] object-cover object-top cursor-pointer hover:opacity-90 transition"
+              onClick={() =>
+                setSelectedImage(
+                  profile.photo ||
+                  "https://via.placeholder.com/300x400"
+                )
+              }
+            />
 
             <div className="p-4">
 
@@ -485,29 +590,29 @@ const BrowseProfiles = () => {
 
 
 
-{/* Image Preview Modal */}
-{selectedImage && (
-  <div
-    className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
-    onClick={() => setSelectedImage(null)}
-  >
-    {/* Close Button */}
-    <button
-      onClick={() => setSelectedImage(null)}
-      className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
-    >
-      ✕ Close
-    </button>
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+          >
+            ✕ Close
+          </button>
 
-    {/* Image */}
-    <img
-      src={selectedImage}
-      alt="Profile Preview"
-      onClick={(e) => e.stopPropagation()}
-      className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
-    />
-  </div>
-)}
+          {/* Image */}
+          <img
+            src={selectedImage}
+            alt="Profile Preview"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+          />
+        </div>
+      )}
     </section>
   );
 };
