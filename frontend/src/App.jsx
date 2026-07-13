@@ -69,8 +69,8 @@ const closePopup = () => {
          <Route path="/register" element={<Register/>} />
          <Route path="/admin/membership" element={<ProtectedRoute><Finance/></ProtectedRoute>} />
       </Routes>
-
-      <Footer />
+<Footer/>
+      
 
 
 

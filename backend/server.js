@@ -33,6 +33,12 @@ app.use("/api/finance",financeRoute);
 app.get("/sitemap.xml", siteMap);
 
 
+app.use('/',(req,res)=>{
+  res.send("API Working")
+})
+
+
+
 
 
 // 🔥 fallback (VERY IMPORTANT)

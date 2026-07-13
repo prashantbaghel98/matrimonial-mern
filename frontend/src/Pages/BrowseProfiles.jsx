@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
 import {
   Filter,
   X,
@@ -17,6 +17,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import Loader from "../Components/Loader";
+
+const PLACEHOLDER_IMG = "https://placehold.co/300x400?text=No+Photo";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const BrowseProfiles = () => {
   const navigate = useNavigate();
@@ -24,6 +28,7 @@ const BrowseProfiles = () => {
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [profiles, setProfiles] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -31,193 +36,172 @@ const BrowseProfiles = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Filters
+  // Filters (applied instantly)
   const [gender, setGender] = useState("");
-  const [city, setCity] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [incomeRange, setIncomeRange] = useState("");
+
+  // City has its own "raw" input + debounced value, so we don't refetch on every keystroke
+  const [cityInput, setCityInput] = useState("");
+  const [city, setCity] = useState("");
+
   const [showFilters, setShowFilters] = useState(false);
 
-  // Calculate Age
+  // Ref used only to skip saving-to-sessionStorage on the very first render
+  const hasLoadedFromStorage = useRef(false);
+  const abortControllerRef = useRef(null);
+
+  // ---------- Helpers ----------
   const calculateAge = (dob) => {
     if (!dob) return 0;
-
     const birthDate = new Date(dob);
     const diff = Date.now() - birthDate.getTime();
     const ageDate = new Date(diff);
-
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  // ---------- Load saved filters (once, on mount) ----------
   useEffect(() => {
     const savedFilters = sessionStorage.getItem("browseFilters");
-
     if (savedFilters) {
-      const filters = JSON.parse(savedFilters);
-
-      setGender(filters.gender || "");
-      setCity(filters.city || "");
-      setMaritalStatus(filters.maritalStatus || "");
-      setAgeRange(filters.ageRange || "");
-      setIncomeRange(filters.incomeRange || "");
-      setCurrentPage(filters.currentPage || 1);
+      try {
+        const filters = JSON.parse(savedFilters);
+        setGender(filters.gender || "");
+        setCity(filters.city || "");
+        setCityInput(filters.city || "");
+        setMaritalStatus(filters.maritalStatus || "");
+        setAgeRange(filters.ageRange || "");
+        setIncomeRange(filters.incomeRange || "");
+        setCurrentPage(filters.currentPage || 1);
+      } catch {
+        sessionStorage.removeItem("browseFilters");
+      }
     }
+    hasLoadedFromStorage.current = true;
   }, []);
 
-
-
-
+  // ---------- Persist filters ----------
   useEffect(() => {
+    if (!hasLoadedFromStorage.current) return; // avoid overwriting saved data on first render
     sessionStorage.setItem(
       "browseFilters",
-      JSON.stringify({
-        gender,
-        city,
-        maritalStatus,
-        ageRange,
-        incomeRange,
-        currentPage,
-      })
+      JSON.stringify({ gender, city, maritalStatus, ageRange, incomeRange, currentPage })
     );
-  }, [
-    gender,
-    city,
-    maritalStatus,
-    ageRange,
-    incomeRange,
-    currentPage,
-  ]);
+  }, [gender, city, maritalStatus, ageRange, incomeRange, currentPage]);
 
-
-  // Same Profile Open When Back 
+  // ---------- Debounce the city text input ----------
   useEffect(() => {
-    const savedPosition = sessionStorage.getItem(
-      "browseScrollPosition"
-    );
+    const timer = setTimeout(() => {
+      setCity(cityInput.trim());
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [cityInput]);
 
-    if (savedPosition) {
-      setTimeout(() => {
+  // ---------- Reset to page 1 whenever a filter changes (not when page itself changes) ----------
+  useEffect(() => {
+    if (!hasLoadedFromStorage.current) return;
+    setCurrentPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gender, city, maritalStatus, ageRange, incomeRange]);
+
+  // ---------- Restore scroll position once, then clear it ----------
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem("browseScrollPosition");
+    if (savedPosition && profiles.length > 0) {
+      const t = setTimeout(() => {
         window.scrollTo(0, Number(savedPosition));
+        sessionStorage.removeItem("browseScrollPosition"); // only restore once
       }, 100);
+      return () => clearTimeout(t);
     }
   }, [profiles]);
 
-
-  // Fetch Profiles
+  // ---------- Fetch profiles (filters applied server-side via query params) ----------
   useEffect(() => {
+    if (!hasLoadedFromStorage.current) return;
+
     const fetchProfiles = async () => {
+      // cancel any in-flight request before starting a new one
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         setLoading(true);
+        setError("");
 
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/profile?page=${currentPage}`
-        );
+        const params = { page: currentPage };
+        if (gender) params.gender = gender;
+        if (city) params.city = city;
+        if (maritalStatus) params.maritalStatus = maritalStatus;
+        if (ageRange) {
+          const [minAge, maxAge] = ageRange.split("-");
+          params.minAge = minAge;
+          params.maxAge = maxAge;
+        }
+        if (incomeRange) {
+          const [minIncome, maxIncome] = incomeRange.split("-");
+          params.minIncome = minIncome;
+          params.maxIncome = maxIncome;
+        }
+
+        // NOTE: backend's GET /api/profile route needs to read these query
+        // params (gender, city, maritalStatus, minAge, maxAge, minIncome,
+        // maxIncome) and filter in the DB query — otherwise filters won't
+        // actually narrow results beyond the current page.
+        const res = await axios.get(`${API_URL}/api/profile`, {
+          params,
+          signal: controller.signal,
+        });
 
         setProfiles(res.data.profiles || []);
         setTotalPages(res.data.totalPages || 1);
-
+        setTotalCount(res.data.totalCount ?? res.data.profiles?.length ?? 0);
       } catch (err) {
-
+        if (axios.isCancel(err) || err.name === "CanceledError") return;
         console.error(err);
-
-        setError(
-          err.response?.data?.message ||
-          "Failed to load profiles"
-        );
-
+        setError(err.response?.data?.message || "Failed to load profiles");
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfiles();
-  }, [currentPage]);
+    return () => abortControllerRef.current?.abort();
+  }, [currentPage, gender, city, maritalStatus, ageRange, incomeRange]);
 
-  // Delete Profile
-  const handleDelete = async (profileId) => {
+  // ---------- Delete ----------
+  const handleDelete = useCallback(
+    async (profileId) => {
+      if (!window.confirm("Are you sure you want to delete this profile?")) return;
+      try {
+        await axios.delete(`${API_URL}/api/profile/delete/${profileId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProfiles((prev) => prev.filter((p) => p._id !== profileId));
+        setTotalCount((prev) => Math.max(0, prev - 1));
+        toast.success("Profile deleted successfully!");
+      } catch (err) {
+        console.error(err);
+        toast.error(err.response?.data?.message || "Failed to delete profile");
+      }
+    },
+    [token]
+  );
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this profile?"
-      )
-    ) {
-      return;
-    }
-
-    try {
-
-      await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/profile/delete/${profileId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setProfiles((prev) =>
-        prev.filter((p) => p._id !== profileId)
-      );
-
-      toast.success("Profile deleted successfully!");
-
-    } catch (err) {
-
-      console.error(err);
-
-      toast.error(
-        err.response?.data?.message ||
-        "Failed to delete profile"
-      );
-    }
+  const resetFilters = () => {
+    setGender("");
+    setCityInput("");
+    setCity("");
+    setAgeRange("");
+    setIncomeRange("");
+    setMaritalStatus("");
+    sessionStorage.removeItem("browseFilters");
   };
 
-  // Age Filter
-  const checkAgeRange = (age) => {
-    if (!ageRange) return true;
-
-    const [min, max] = ageRange.split("-").map(Number);
-
-    return age >= min && age <= max;
-  };
-
-  // Income Filter
-  const checkIncomeRange = (income) => {
-    if (!incomeRange) return true;
-
-    const [min, max] = incomeRange.split("-").map(Number);
-
-    return (
-      Number(income) >= min &&
-      Number(income) <= max
-    );
-  };
-
-  // Filter Profiles
-  const filteredProfiles = profiles.filter((profile) => {
-
-    const age = calculateAge(profile.dob);
-
-    return (
-      (gender === "" ||
-        profile.gender === gender) &&
-
-      (city === "" ||
-        profile.city
-          ?.toLowerCase()
-          .includes(city.toLowerCase())) &&
-
-      (maritalStatus === "" ||
-        profile.maritalStatus === maritalStatus) &&
-
-      checkAgeRange(age) &&
-      checkIncomeRange(profile.income)
-    );
-  });
-
-  // Loading
-  if (loading) {
+  // ---------- Loading (first load only) ----------
+  if (loading && profiles.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
@@ -225,37 +209,18 @@ const BrowseProfiles = () => {
     );
   }
 
-  // Error
   if (error) {
-    return (
-      <p className="text-center mt-20 text-red-600">
-        {error}
-      </p>
-    );
+    return <p className="text-center mt-20 text-red-600">{error}</p>;
   }
 
-  return (
-    <section className="min-h-screen py-10 max-w-7xl mx-auto  px-4 md:px-6">
-
-
-
-
+  return profiles ? (
+    <section className="min-h-screen py-10 max-w-7xl mx-auto px-4 md:px-6">
       {/* Header */}
-
       <div className="flex justify-between items-center mb-8">
-
         <div>
-
-          <h2 className="text-2xl lg:text-3xl font-bold">
-            Browse Matches
-          </h2>
-
-          <p className="text-gray-500 mt-0">
-            {/* {filteredProfiles.length} Profiles Found */}
-          </p>
-
+          <h2 className="text-2xl lg:text-3xl font-bold">Browse Matches</h2>
+          <p className="text-gray-500 mt-0">{totalCount} Profiles Found</p>
         </div>
-
         <button
           onClick={() => setShowFilters(true)}
           className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg transition"
@@ -263,27 +228,17 @@ const BrowseProfiles = () => {
           <Filter size={20} />
           Filters
         </button>
-
       </div>
 
-
       {/* Filter Popup */}
-
       {showFilters && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  Filter Profiles
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Find your perfect match
-                </p>
+                <h2 className="text-xl font-bold text-gray-800">Filter Profiles</h2>
+                <p className="text-sm text-gray-500">Find your perfect match</p>
               </div>
-
               <button
                 onClick={() => setShowFilters(false)}
                 className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
@@ -292,18 +247,14 @@ const BrowseProfiles = () => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="p-5">
-
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
                 {/* Gender */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
                     <Users size={16} />
                     Gender
                   </label>
-
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
@@ -321,16 +272,11 @@ const BrowseProfiles = () => {
                     <MapPin size={16} />
                     City
                   </label>
-
                   <div className="relative">
-                    <Search
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
-
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      value={cityInput}
+                      onChange={(e) => setCityInput(e.target.value)}
                       placeholder="Search City"
                       className="w-full h-10 rounded-lg border border-gray-300 pl-9 pr-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
                     />
@@ -343,7 +289,6 @@ const BrowseProfiles = () => {
                     <Calendar size={16} />
                     Age
                   </label>
-
                   <select
                     value={ageRange}
                     onChange={(e) => setAgeRange(e.target.value)}
@@ -364,7 +309,6 @@ const BrowseProfiles = () => {
                     <IndianRupee size={16} />
                     Salary
                   </label>
-
                   <select
                     value={incomeRange}
                     onChange={(e) => setIncomeRange(e.target.value)}
@@ -386,7 +330,6 @@ const BrowseProfiles = () => {
                     <Heart size={16} />
                     Marital Status
                   </label>
-
                   <select
                     value={maritalStatus}
                     onChange={(e) => setMaritalStatus(e.target.value)}
@@ -400,144 +343,77 @@ const BrowseProfiles = () => {
                     <option value="Separated">Separated</option>
                   </select>
                 </div>
-
               </div>
 
-              {/* Footer */}
               <div className="flex justify-end gap-3 mt-6 pt-5 border-t">
-
                 <button
-                  onClick={() => {
-                    setGender("");
-                    setCity("");
-                    setAgeRange("");
-                    setIncomeRange("");
-                    setMaritalStatus("");
-
-                    sessionStorage.removeItem("browseFilters");
-                  }}
+                  onClick={resetFilters}
                   className="h-10 px-5 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center gap-2 text-sm font-medium transition"
                 >
                   <RotateCcw size={16} />
                   Reset
                 </button>
-
                 <button
                   onClick={() => setShowFilters(false)}
                   className="h-10 px-6 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-md transition"
                 >
                   Apply Filters
                 </button>
-
               </div>
-
             </div>
           </div>
         </div>
       )}
 
-
+      {/* Subtle loading indicator while re-fetching filtered/paged data */}
+      {loading && profiles.length > 0 && (
+        <div className="text-center text-sm text-gray-400 mb-4">Updating results…</div>
+      )}
 
       {/* Empty */}
-      {filteredProfiles.length === 0 && (
-        <div className="text-center text-gray-500 text-lg">
-          No profiles found
-        </div>
+      {!loading && profiles.length === 0 && (
+        <div className="text-center text-gray-500 text-lg">No profiles found</div>
       )}
 
       {/* Profiles */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
-        {filteredProfiles.map((profile) => (
-
-          <div
-            key={profile._id}
-            className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden"
-          >
-
+        {profiles.map((profile) => (
+          <div key={profile._id} className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden">
             <img
-              src={
-                profile.photo ||
-                "https://via.placeholder.com/300x400"
-              }
+              src={profile.photo || PLACEHOLDER_IMG}
               alt={profile.name}
+              loading="lazy"
               className="w-full h-[300px] object-cover object-top cursor-pointer hover:opacity-90 transition"
-              onClick={() =>
-                setSelectedImage(
-                  profile.photo ||
-                  "https://via.placeholder.com/300x400"
-                )
-              }
+              onClick={() => setSelectedImage(profile.photo || PLACEHOLDER_IMG)}
             />
-
             <div className="p-4">
-
-              <h3 className="font-semibold capitalize text-lg">
-                {profile.name}
-              </h3>
-
-              <p className="text-gray-500 text-sm">
-                {profile.city}
-              </p>
-
+              <h3 className="font-semibold capitalize text-lg">{profile.name}</h3>
+              <p className="text-gray-500 text-sm">{profile.city}</p>
             </div>
-
             <div className="px-4 pb-4 text-sm">
-
               <div className="grid grid-cols-2 gap-3 mb-4">
-
                 <div>
-                  <p className="text-gray-400">
-                    AGE
-                  </p>
-
-                  <p className="font-medium">
-                    {calculateAge(profile.dob)}
-                  </p>
+                  <p className="text-gray-400">AGE</p>
+                  <p className="font-medium">{calculateAge(profile.dob)}</p>
                 </div>
-
                 <div>
-                  <p className="text-gray-400">
-                    INCOME
-                  </p>
-
-                  <p className="font-medium">
-                    ₹{profile.income}
-                  </p>
+                  <p className="text-gray-400">INCOME</p>
+                  <p className="font-medium">₹{profile.income}</p>
                 </div>
-
                 <div>
-                  <p className="text-gray-400">
-                    EDUCATION
-                  </p>
-
-                  <p className="font-medium">
-                    {profile.education}
-                  </p>
+                  <p className="text-gray-400">EDUCATION</p>
+                  <p className="font-medium">{profile.education}</p>
                 </div>
-
                 <div>
-                  <p className="text-gray-400">
-                    PROFESSION
-                  </p>
-
-                  <p className="font-medium">
-                    {profile.occupation}
-                  </p>
+                  <p className="text-gray-400">PROFESSION</p>
+                  <p className="font-medium">{profile.occupation}</p>
                 </div>
-
               </div>
 
-              {/* Buttons */}
               <div className="flex flex-col gap-2">
-
                 <button
                   onClick={() => {
-                    sessionStorage.setItem(
-                      "browseScrollPosition",
-                      window.scrollY
-                    );
-
+                    sessionStorage.setItem("browseScrollPosition", window.scrollY);
                     navigate(`/browse-profile/${profile._id}`);
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
@@ -545,90 +421,65 @@ const BrowseProfiles = () => {
                   <FileText size={16} />
                   View Full Biodata
                 </button>
-
-                {user?.role === 'admin' && (
-
+                {user?.role === "admin" && (
                   <div className="flex gap-2 mt-2">
-
                     <button
-                      onClick={() =>
-                        navigate(`/update-profile/${profile._id}`)
-                      }
+                      onClick={() => navigate(`/update-profile/${profile._id}`)}
                       className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200"
                     >
                       <Edit size={16} />
                       Edit
                     </button>
-
                     <button
-                      onClick={() =>
-                        handleDelete(profile._id)
-                      }
+                      onClick={() => handleDelete(profile._id)}
                       className="flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-700 py-2 rounded-lg hover:bg-red-200"
                     >
                       <Trash2 size={16} />
                       Delete
                     </button>
-
                   </div>
                 )}
-
               </div>
-
             </div>
-
           </div>
         ))}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
+          >
+            Previous
+          </button>
 
-        {/* Previous */}
-        <button
-          disabled={currentPage === 1}
-          onClick={() =>
-            setCurrentPage((prev) => prev - 1)
-          }
-          className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
-        >
-          Previous
-        </button>
-
-        {/* Page Numbers */}
-        {[...Array(totalPages)].map((_, index) => {
-
-          const page = index + 1;
-
-          return (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 rounded-lg border ${currentPage === page
-                ? "bg-red-500 text-white"
-                : "bg-white"
+          {[...Array(totalPages)].map((_, index) => {
+            const page = index + 1;
+            return (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-4 py-2 rounded-lg border ${
+                  currentPage === page ? "bg-red-500 text-white" : "bg-white"
                 }`}
-            >
-              {page}
-            </button>
-          );
-        })}
+              >
+                {page}
+              </button>
+            );
+          })}
 
-        {/* Next */}
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() =>
-            setCurrentPage((prev) => prev + 1)
-          }
-          className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
-        >
-          Next
-        </button>
-
-      </div>
-
-
-
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Image Preview Modal */}
       {selectedImage && (
@@ -636,15 +487,12 @@ const BrowseProfiles = () => {
           className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
-          {/* Close Button */}
           <button
             onClick={() => setSelectedImage(null)}
             className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
           >
             ✕ Close
           </button>
-
-          {/* Image */}
           <img
             src={selectedImage}
             alt="Profile Preview"
@@ -654,7 +502,7 @@ const BrowseProfiles = () => {
         </div>
       )}
     </section>
-  );
+  ):<Loader/>
 };
 
 export default BrowseProfiles;
