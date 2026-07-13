@@ -203,9 +203,7 @@ const BrowseProfiles = () => {
   // ---------- Loading (first load only) ----------
   if (loading && profiles.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
+    <Loader/>
     );
   }
 
@@ -213,7 +211,7 @@ const BrowseProfiles = () => {
     return <p className="text-center mt-20 text-red-600">{error}</p>;
   }
 
-  return profiles ? (
+  return (
     <section className="min-h-screen py-10 max-w-7xl mx-auto px-4 md:px-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
@@ -414,7 +412,17 @@ const BrowseProfiles = () => {
                 <button
                   onClick={() => {
                     sessionStorage.setItem("browseScrollPosition", window.scrollY);
-                    navigate(`/browse-profile/${profile._id}`);
+                   navigate(
+  `/browse-profile/${profile.name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")}`,
+  {
+    state: {
+      id: profile._id
+    }
+  }
+);
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
                 >
@@ -502,7 +510,7 @@ const BrowseProfiles = () => {
         </div>
       )}
     </section>
-  ):<Loader/>
+  )
 };
 
 export default BrowseProfiles;

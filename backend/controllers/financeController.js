@@ -179,7 +179,7 @@ const updateFinance = async (req, res) => {
           expiryDate,
         },
         {
-          new: true,
+          new: true, 
           runValidators: true,
         }
       );

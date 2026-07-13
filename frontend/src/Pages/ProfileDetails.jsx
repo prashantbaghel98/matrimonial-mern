@@ -1,16 +1,23 @@
 import React, { useContext, useEffect, useState } from "react";
 import { User, GraduationCap, Users, Heart } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import "./ProfileDetails.css"
 
+
+
 import { Helmet } from "react-helmet-async";
+import Loader from "../Components/Loader";
+
 
 const ProfileDetails = () => {
-  const { id } = useParams();
+ const { name } = useParams();
+const location = useLocation();
+
+const id = location.state?.id;
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
@@ -142,10 +149,12 @@ badges.forEach((el) => {
     document.body.removeChild(clone);
   };
 
-  if (!profile) return <p>Loading...</p>;
+ 
 
-  return (
+  return profile ? (
     <>
+
+    
 
       <Helmet>
 
@@ -316,7 +325,7 @@ badges.forEach((el) => {
         </div>
       </div>
     </>
-  );
+  ): <Loader/>
 
 };
 

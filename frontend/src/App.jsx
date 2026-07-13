@@ -60,7 +60,7 @@ const closePopup = () => {
         <Route path='/contact' element={<ContactUs />} />
         <Route path='/schedule-call' element={<ScheduleCall />} />
         <Route path='/browse-profile' element={<BrowseProfiles />} />
-        <Route path="/browse-profile/:id" element={<ProfileDetails />} />
+        <Route path="/browse-profile/:name" element={<ProfileDetails />} />
         <Route path='/user/dashboard' element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
         <Route path='/admin/dashboard' element={<ProtectedRoute><AdminDashboard/></ProtectedRoute>} />
         <Route path='/profile-create' element={<ProtectedRoute><CreateProfile mode="create" /></ProtectedRoute>} />

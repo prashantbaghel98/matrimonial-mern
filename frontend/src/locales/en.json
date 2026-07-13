@@ -159,15 +159,16 @@
     "about": {
         "pageTitle": "About Us",
         "hero": {
-            "title": "Building Families with Trust & Tradition",
+            "title": "Building Families with",
+            "highlight": "Trust & Tradition",
             "description": "Apna Vivah is a dedicated matrimonial platform serving the Pal, Baghel, and Dhangar communities with personalized matchmaking services."
         },
         "ourStory": {
             "title": "Our Story",
             "subtitle": "A Vision for Community Matrimony",
-            "description1": "Apna Vivah was founded with a simple yet powerful vision.",
-            "description2": "Under the leadership of Vinod Kumar Baghel, we have successfully connected hundreds of families.",
-            "description3": "We believe every marriage is unique.",
+            "description1": "Apna Vivah was founded with a simple yet powerful vision to help families from the Pal, Baghel, and Dhangar communities find suitable life partners while preserving our rich cultural values.",
+            "description2": "Under the leadership of Vinod Kumar Baghel, we have successfully connected hundreds of families and created lasting bonds of love and companionship.",
+            "description3": "We take a personalized approach to every match, ensuring compatibility at every level.",
             "founder": {
                 "name": "Vinod Kumar Baghel",
                 "designation": "Founder & Director"
@@ -179,26 +180,26 @@
             "items": [
                 {
                     "title": "Trust",
-                    "description": "Building relationships based on transparency, honesty, and mutual respect."
+                    "description": "Building relationships based on transparency and honesty."
                 },
                 {
                     "title": "Community",
-                    "description": "Serving our communities with dedication, care, and understanding."
+                    "description": "Serving our communities with dedication and respect."
                 },
                 {
                     "title": "Commitment",
-                    "description": "Going above and beyond to help families find the right life partner."
+                    "description": "Going above and beyond to find the perfect match."
                 },
                 {
                     "title": "Excellence",
-                    "description": "Maintaining high standards of service and professionalism."
+                    "description": "Maintaining high standards in every interaction."
                 }
             ]
         },
         "communities": {
             "title": "Our Communities",
             "subtitle": "Proudly Serving",
-            "description": "We exclusively serve these vibrant communities with deep understanding of their traditions.",
+            "description": "We exclusively serve these vibrant communities with a deep understanding of their traditions.",
             "items": [
                 {
                     "name": "Pal Community",
@@ -206,17 +207,17 @@
                 },
                 {
                     "name": "Baghel Community",
-                    "description": "Dedicated matchmaking services."
+                    "description": "Dedicated matchmaking services"
                 },
                 {
                     "name": "Dhangar Community",
                     "description": "Dedicated matchmaking services"
                 }
-            ],
-            "cta": {
-                "title": "Ready to Start Your Journey?",
-                "description": "Connect with us today and let us help you find your perfect life partner."
-            }
+            ]
+        },
+        "cta": {
+            "title": "Ready to Start Your Journey?",
+            "description": "Connect with us today and let us help you find your perfect life partner."
         }
     },
     "membership": {
