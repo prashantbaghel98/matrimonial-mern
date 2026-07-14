@@ -28,6 +28,7 @@ const BrowseProfiles = () => {
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [profiles, setProfiles] = useState([]);
+  const [allProfiles, setAllProfiles] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,6 +38,7 @@ const BrowseProfiles = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   // Filters (applied instantly)
+  const [nameSearch, setNameSearch] = useState("");
   const [gender, setGender] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [ageRange, setAgeRange] = useState("");
@@ -67,6 +69,7 @@ const BrowseProfiles = () => {
     if (savedFilters) {
       try {
         const filters = JSON.parse(savedFilters);
+        setNameSearch(filters.nameSearch || "");
         setGender(filters.gender || "");
         setCity(filters.city || "");
         setCityInput(filters.city || "");
@@ -86,9 +89,9 @@ const BrowseProfiles = () => {
     if (!hasLoadedFromStorage.current) return; // avoid overwriting saved data on first render
     sessionStorage.setItem(
       "browseFilters",
-      JSON.stringify({ gender, city, maritalStatus, ageRange, incomeRange, currentPage })
+      JSON.stringify({nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage })
     );
-  }, [gender, city, maritalStatus, ageRange, incomeRange, currentPage]);
+  }, [nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage]);
 
   // ---------- Debounce the city text input ----------
   useEffect(() => {
@@ -103,7 +106,7 @@ const BrowseProfiles = () => {
     if (!hasLoadedFromStorage.current) return;
     setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gender, city, maritalStatus, ageRange, incomeRange]);
+  }, [nameSearch, gender, city, maritalStatus, ageRange, incomeRange]);
 
   // ---------- Restore scroll position once, then clear it ----------
   useEffect(() => {
@@ -117,59 +120,251 @@ const BrowseProfiles = () => {
     }
   }, [profiles]);
 
-  // ---------- Fetch profiles (filters applied server-side via query params) ----------
+
+
+  // ---------- Fetch all profiles ----------
+
   useEffect(() => {
-    if (!hasLoadedFromStorage.current) return;
-
     const fetchProfiles = async () => {
-      // cancel any in-flight request before starting a new one
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
       try {
         setLoading(true);
         setError("");
 
-        const params = { page: currentPage };
-        if (gender) params.gender = gender;
-        if (city) params.city = city;
-        if (maritalStatus) params.maritalStatus = maritalStatus;
-        if (ageRange) {
-          const [minAge, maxAge] = ageRange.split("-");
-          params.minAge = minAge;
-          params.maxAge = maxAge;
-        }
-        if (incomeRange) {
-          const [minIncome, maxIncome] = incomeRange.split("-");
-          params.minIncome = minIncome;
-          params.maxIncome = maxIncome;
-        }
+        const res = await axios.get(
+          `${API_URL}/api/profile`
+        );
 
-        // NOTE: backend's GET /api/profile route needs to read these query
-        // params (gender, city, maritalStatus, minAge, maxAge, minIncome,
-        // maxIncome) and filter in the DB query — otherwise filters won't
-        // actually narrow results beyond the current page.
-        const res = await axios.get(`${API_URL}/api/profile`, {
-          params,
-          signal: controller.signal,
-        });
+        const profileData =
+          res.data.profiles || [];
 
-        setProfiles(res.data.profiles || []);
-        setTotalPages(res.data.totalPages || 1);
-        setTotalCount(res.data.totalCount ?? res.data.profiles?.length ?? 0);
-      } catch (err) {
-        if (axios.isCancel(err) || err.name === "CanceledError") return;
-        console.error(err);
-        setError(err.response?.data?.message || "Failed to load profiles");
+        setAllProfiles(profileData);
+
+      } catch (error) {
+        console.error(
+          "Profile fetch error:",
+          error
+        );
+
+        setError(
+          error.response?.data
+            ?.message ||
+          "Failed to load profiles"
+        );
+
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfiles();
-    return () => abortControllerRef.current?.abort();
-  }, [currentPage, gender, city, maritalStatus, ageRange, incomeRange]);
+
+  }, []);
+
+
+  // ---------- Frontend profile filtering ----------
+
+  useEffect(() => {
+
+    let filteredData = [
+      ...allProfiles
+    ];
+
+
+    // Name filter
+
+    if (nameSearch.trim()) {
+      const searchedName = nameSearch
+        .trim()
+        .toLowerCase();
+
+      filteredData = filteredData.filter((profile) => {
+        const profileName = String(
+          profile.name || ""
+        )
+          .trim()
+          .toLowerCase();
+
+        return profileName.includes(searchedName);
+      });
+    }
+
+    // Gender filter
+
+    if (gender) {
+
+      filteredData =
+        filteredData.filter(
+          (profile) =>
+
+            profile.gender
+              ?.trim()
+              .toLowerCase() ===
+
+            gender
+              .trim()
+              .toLowerCase()
+        );
+
+    }
+
+
+    // City filter
+
+    if (city) {
+
+      filteredData =
+        filteredData.filter(
+          (profile) =>
+
+            profile.city
+              ?.trim()
+              .toLowerCase()
+              .includes(
+                city
+                  .trim()
+                  .toLowerCase()
+              )
+        );
+
+    }
+
+
+    // Marital status filter
+
+    if (maritalStatus) {
+
+      filteredData =
+        filteredData.filter(
+          (profile) =>
+
+            profile.maritalStatus
+              ?.trim()
+              .toLowerCase() ===
+
+            maritalStatus
+              .trim()
+              .toLowerCase()
+        );
+
+    }
+
+
+    // Age filter
+
+    if (ageRange) {
+
+      const [
+        minimumAge,
+        maximumAge
+      ] = ageRange
+        .split("-")
+        .map(Number);
+
+
+      filteredData =
+        filteredData.filter(
+          (profile) => {
+
+            const profileAge =
+              calculateAge(
+                profile.dob
+              );
+
+            return (
+              profileAge >=
+              minimumAge &&
+
+              profileAge <=
+              maximumAge
+            );
+
+          }
+        );
+
+    }
+
+
+    // Income filter
+
+    if (incomeRange) {
+
+      const [
+        minimumIncome,
+        maximumIncome
+      ] = incomeRange
+        .split("-")
+        .map(Number);
+
+
+      filteredData =
+        filteredData.filter(
+          (profile) => {
+
+            /*
+            Removes commas and
+            other characters.
+  
+            Example:
+  
+            ₹8,00,000
+            becomes
+            800000
+            */
+
+            const profileIncome =
+              Number(
+                String(
+                  profile.income ||
+                  0
+                ).replace(
+                  /[^0-9]/g,
+                  ""
+                )
+              );
+
+
+            return (
+
+              profileIncome >=
+              minimumIncome &&
+
+              profileIncome <=
+              maximumIncome
+
+            );
+
+          }
+        );
+
+    }
+
+
+    setProfiles(
+      filteredData
+    );
+
+    setTotalCount(
+      filteredData.length
+    );
+
+    setTotalPages(1);
+
+  }, [
+    nameSearch,
+
+    allProfiles,
+
+    gender,
+
+    city,
+
+    maritalStatus,
+
+    ageRange,
+
+    incomeRange
+
+  ]);
 
   // ---------- Delete ----------
   const handleDelete = useCallback(
@@ -191,6 +386,7 @@ const BrowseProfiles = () => {
   );
 
   const resetFilters = () => {
+    setNameSearch("");
     setGender("");
     setCityInput("");
     setCity("");
@@ -203,7 +399,7 @@ const BrowseProfiles = () => {
   // ---------- Loading (first load only) ----------
   if (loading && profiles.length === 0) {
     return (
-    <Loader/>
+      <Loader />
     );
   }
 
@@ -247,6 +443,31 @@ const BrowseProfiles = () => {
 
             <div className="p-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Name Search */}
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Search size={16} />
+                    Name
+                  </label>
+
+                  <div className="relative">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+
+                    <input
+                      type="text"
+                      value={nameSearch}
+                      onChange={(e) =>
+                        setNameSearch(e.target.value)
+                      }
+                      placeholder="Search by name"
+                      className="w-full h-10 rounded-lg border border-gray-300 pl-9 pr-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                    />
+                  </div>
+                </div>
                 {/* Gender */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
@@ -412,17 +633,17 @@ const BrowseProfiles = () => {
                 <button
                   onClick={() => {
                     sessionStorage.setItem("browseScrollPosition", window.scrollY);
-                   navigate(
-  `/browse-profile/${profile.name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")}`,
-  {
-    state: {
-      id: profile._id
-    }
-  }
-);
+                    navigate(
+                      `/browse-profile/${profile.name
+                        .toLowerCase()
+                        .trim()
+                        .replace(/\s+/g, "-")}`,
+                      {
+                        state: {
+                          id: profile._id
+                        }
+                      }
+                    );
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
                 >
@@ -470,9 +691,8 @@ const BrowseProfiles = () => {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg border ${
-                  currentPage === page ? "bg-red-500 text-white" : "bg-white"
-                }`}
+                className={`px-4 py-2 rounded-lg border ${currentPage === page ? "bg-red-500 text-white" : "bg-white"
+                  }`}
               >
                 {page}
               </button>
