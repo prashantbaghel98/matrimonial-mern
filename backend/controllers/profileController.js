@@ -275,7 +275,7 @@ const deleteProfile = async (req, res) => {
       });
 
     }
-
+ 
     await profileModel.findByIdAndDelete(profileId);
 
     res.status(200).json({

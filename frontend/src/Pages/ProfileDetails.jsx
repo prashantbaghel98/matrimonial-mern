@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { User, GraduationCap, Users, Heart } from "lucide-react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import html2canvas from "html2canvas";
@@ -14,10 +14,7 @@ import Loader from "../Components/Loader";
 
 
 const ProfileDetails = () => {
- const { name } = useParams();
-const location = useLocation();
-
-const id = location.state?.id;
+const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
