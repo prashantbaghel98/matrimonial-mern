@@ -9,7 +9,25 @@
 }
 
 
+.card-image{
+    width:250px !important;
+    height:280px !important;
+    object-fit:cover !important;
+    object-position:top !important;
+  }
 
+.download-mode .header{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:flex-start !important;
+}
+
+.download-mode .card-image{
+  width:150px !important;
+  height:180px !important;
+  object-fit:cover !important;
+  object-position:top !important;
+}
 
 
 
@@ -35,6 +53,31 @@
    .header p  {
   font-size: 15px!important;
   }
+
+  .header{
+    display:grid !important;
+    gap:10px !important;
+  }
+
+  .card-image{
+    width:100% !important;
+    height:350px !important;
+    object-fit:contain !important;
+    object-position:center !important;
+  }
+
+.download-mode .header{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:flex-start !important;
+}
+
+.download-mode .card-image{
+  width:120px !important;
+  height:150px !important;
+  object-fit:cover !important;
+  object-position:top !important;
+}
 
 
 

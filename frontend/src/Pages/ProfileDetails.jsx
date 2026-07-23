@@ -14,7 +14,7 @@ import Loader from "../Components/Loader";
 
 
 const ProfileDetails = () => {
-const { id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
@@ -101,25 +101,25 @@ ${frontendUrl}
   const downloadImage = async () => {
     const original = document.getElementById("pdf-content");
 
-    
+
 
     const clone = original.cloneNode(true);
-
+clone.classList.add("download-mode");
     clone.style.position = "fixed";
     clone.style.top = "-9999px";
     clone.style.left = "0";
     clone.style.padding = "30px";
     clone.style.width = "800px";
-    clone.style.background = "#ffffff"; 
+    clone.style.background = "#ffffff";
     clone.style.boxSizing = "border-box";
 
     document.body.appendChild(clone);
-  
+
     const badges = clone.querySelectorAll("[data-badge]");
 
-badges.forEach((el) => {
-  el.style.paddingBottom = "10px";
-});
+    badges.forEach((el) => {
+      el.style.paddingBottom = "10px";
+    });
 
     await new Promise((r) => setTimeout(r, 200));
 
@@ -146,12 +146,12 @@ badges.forEach((el) => {
     document.body.removeChild(clone);
   };
 
- 
+
 
   return profile ? (
     <>
 
-    
+
 
       <Helmet>
 
@@ -207,12 +207,12 @@ badges.forEach((el) => {
           <button onClick={() => navigate(-1)} style={styles.btn}>
             ← Back
           </button>
-<button
-  onClick={downloadImage}
-  style={styles.downloadBtn}
->
-  Download
-</button>
+          <button
+            onClick={downloadImage}
+            style={styles.downloadBtn}
+          >
+            Download
+          </button>
 
 
           <button
@@ -270,7 +270,7 @@ badges.forEach((el) => {
               </div>
             </div>
 
-            <img
+            <img className="card-image"
               src={profile.photo || "https://via.placeholder.com/150"}
               style={styles.image}
             />
@@ -322,7 +322,7 @@ badges.forEach((el) => {
         </div>
       </div>
     </>
-  ): <Loader/>
+  ) : <Loader />
 
 };
 
@@ -350,9 +350,10 @@ const Item = ({ label, value }) => (
 // 🔹 Styles
 const styles = {
   page: {
+
     background: "#f3f4f6",
     padding: "40px",
-    marginTop: "10px",
+    marginTop: "0px",
     minHeight: "100vh",
 
   },
@@ -386,6 +387,7 @@ const styles = {
     width: "120px",
     height: "150px",
     objectFit: "cover",
+    objectPosition: "top",
     border: "2px solid #000",
   },
   infoBlock: {
