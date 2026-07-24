@@ -60,9 +60,9 @@
   }
 
   .card-image{
-    width:100% !important;
-    height:350px !important;
-    object-fit:contain !important;
+    width:350px !important;
+    height:400px !important;
+    object-fit:cover!important;
     object-position:center !important;
   }
 
