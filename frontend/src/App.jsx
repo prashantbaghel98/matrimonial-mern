@@ -21,34 +21,38 @@ import ProtectedRoute from './Pages/ProtectedRoute'
 import Register from './Pages/Register'
 import AdminDashboard from './Pages/AdminDashboard'
 import OfferPopup from './Components/OfferPopup'
-import {useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Finance from './Components/Finance'
+import PrivacyPolicy from './Pages/PrivacyPolicy'
+import Terms from './Pages/Terms'
+import Disclaimer from './Pages/Disclaimer'
+import RefundPolicy from './Pages/RefundPolicy'
 
 
 
 
 function App() {
-const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
-  const popupShown = localStorage.getItem("offerPopupShown");
+    const popupShown = localStorage.getItem("offerPopupShown");
 
-  if (!popupShown) {
-    setTimeout(() => {
-      setIsOpen(true);
-    }, 1000);
-  }
-}, []);
+    if (!popupShown) {
+      setTimeout(() => {
+        setIsOpen(true);
+      }, 1000);
+    }
+  }, []);
 
-const closePopup = () => {
-  localStorage.setItem("offerPopupShown", "true");
-  setIsOpen(false);
-};
+  const closePopup = () => {
+    localStorage.setItem("offerPopupShown", "true");
+    setIsOpen(false);
+  };
 
 
 
   return (
     <>
-    <OfferPopup onClick={closePopup}/>
+      <OfferPopup onClick={closePopup} />
       <Header />
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <ScrollToTop />
@@ -62,15 +66,19 @@ const closePopup = () => {
         <Route path='/browse-profile' element={<BrowseProfiles />} />
         <Route path="/browse-profile/:id" element={<ProfileDetails />} />
         <Route path='/user/dashboard' element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-        <Route path='/admin/dashboard' element={<ProtectedRoute><AdminDashboard/></ProtectedRoute>} />
+        <Route path='/admin/dashboard' element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path='/profile-create' element={<ProtectedRoute><CreateProfile mode="create" /></ProtectedRoute>} />
         <Route path="/update-profile/:id" element={<ProtectedRoute><CreateProfile mode="update" /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
-         <Route path="/register" element={<Register/>} />
-         <Route path="/admin/membership" element={<ProtectedRoute><Finance/></ProtectedRoute>} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/admin/membership" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+        <Route path='/privacy' element={<PrivacyPolicy />} />
+        <Route path='/terms-condition' element={<Terms />} />
+        <Route path='/disclaimer' element={<Disclaimer />} />
+        <Route path='/refund' element={<RefundPolicy />} />
       </Routes>
-<Footer/>
-      
+      <Footer />
+
 
 
 

@@ -430,6 +430,284 @@
             "email": "contact@apnavivah.com",
             "address": "Ghaziabad, India"
         },
-        "copyright": "© 2026 Apna Vivah. All Rights Reserved."
+        "copyright": "© 2026 Apna Vivah. All Rights Reserved.",
+        "links": {
+            "home": "Home",
+            "privacyPolicy": "Privacy Policy",
+            "termsConditions": "Terms & Conditions",
+            "disclaimer": "Disclaimer",
+            "refundPolicy": "Refund Policy"
+        }
+    },
+    "privacy": {
+        "pageTitle": "Privacy Policy",
+        "hero": {
+            "title": "Privacy Policy",
+            "subtitle": "Your privacy is important to us. This policy explains how Apna Vivah collects, uses and protects your personal information."
+        },
+        "sections": [
+            {
+                "title": "1. Information We Collect",
+                "content": [
+                    "Full Name",
+                    "Age",
+                    "Gender",
+                    "Community",
+                    "Education",
+                    "Occupation",
+                    "Mobile Number",
+                    "WhatsApp Number",
+                    "Photos",
+                    "Family Details"
+                ]
+            },
+            {
+                "title": "2. How We Collect Information",
+                "paragraph": "We collect information only when you voluntarily provide your biodata, register with us, purchase membership or contact us through WhatsApp."
+            },
+            {
+                "title": "3. Consent",
+                "paragraph": "We upload your matrimonial profile only after receiving your permission. You may request profile removal at any time."
+            },
+            {
+                "title": "4. Use of Information",
+                "content": [
+                    "Create your matrimonial profile",
+                    "Provide matchmaking services",
+                    "Respond to your enquiries",
+                    "Improve our services",
+                    "Prevent fraud"
+                ]
+            },
+            {
+                "title": "5. Contact Information",
+                "paragraph": "Your mobile number and address are never displayed publicly. Contact details are shared only according to our membership process."
+            },
+            {
+                "title": "6. Data Security",
+                "paragraph": "We take reasonable steps to protect your personal information against unauthorized access and misuse."
+            },
+            {
+                "title": "7. Profile Removal",
+                "paragraph": "You may request profile removal anytime by contacting us through WhatsApp or Email."
+            },
+            {
+                "title": "8. Contact Us",
+                "paragraph": "For any privacy related query please contact us."
+            }
+        ],
+        "contact": {
+            "phone": "+91 7017225698",
+            "email": "contact@apnavivah.com",
+            "address": "Ghaziabad, Uttar Pradesh, India"
+        }
+    },
+    "terms": {
+        "pageTitle": "Terms & Conditions",
+        "hero": {
+            "title": "Terms & Conditions",
+            "subtitle": "Please read these Terms & Conditions carefully before using Apna Vivah. By accessing or using our website and services, you agree to be bound by these terms."
+        },
+        "sections": [
+            {
+                "title": "1. Acceptance of Terms",
+                "paragraph": "By using Apna Vivah, you confirm that you have read, understood, and agreed to these Terms & Conditions. If you do not agree with any part of these terms, please do not use our services."
+            },
+            {
+                "title": "2. Eligibility",
+                "content": [
+                    "You must be legally eligible for marriage under applicable laws.",
+                    "You must provide accurate and truthful information.",
+                    "You must have the authority to submit your own profile or the profile of your family member with their consent."
+                ]
+            },
+            {
+                "title": "3. Profile Submission",
+                "paragraph": "Profiles are published only after receiving permission from the individual or their family. By submitting a profile, you confirm that all information provided is true to the best of your knowledge."
+            },
+            {
+                "title": "4. Profile Verification",
+                "paragraph": "Apna Vivah reviews profiles before publishing them. However, we do not guarantee the complete accuracy of every detail provided by users. Families should independently verify all information before making any matrimonial decision."
+            },
+            {
+                "title": "5. Membership Services",
+                "content": [
+                    "Some services are available only to paid members.",
+                    "Membership fees are applicable according to the selected plan.",
+                    "Membership benefits remain valid only during the active membership period."
+                ]
+            },
+            {
+                "title": "6. Payment",
+                "paragraph": "All payments made towards membership are processed through accepted payment methods. Users should keep payment receipts for future reference."
+            },
+            {
+                "title": "7. Refund Policy",
+                "paragraph": "Refunds are governed by our Refund Policy. Please read the Refund Policy before purchasing any membership plan."
+            },
+            {
+                "title": "8. User Responsibilities",
+                "content": [
+                    "Provide genuine information.",
+                    "Respect other users.",
+                    "Do not misuse contact information.",
+                    "Do not upload false or misleading information.",
+                    "Do not use the platform for illegal activities."
+                ]
+            },
+            {
+                "title": "9. Privacy",
+                "paragraph": "Your personal information is handled according to our Privacy Policy. By using our services, you agree to our Privacy Policy."
+            },
+            {
+                "title": "10. Intellectual Property",
+                "paragraph": "All website content including text, logo, design, graphics and branding belongs to Apna Vivah unless otherwise stated. Unauthorized copying or reproduction is prohibited."
+            },
+            {
+                "title": "11. Limitation of Liability",
+                "paragraph": "Apna Vivah acts only as a matrimonial introduction platform. We do not guarantee marriage, compatibility, or the authenticity of every statement made by users. Users are responsible for independently verifying all information before proceeding."
+            },
+            {
+                "title": "12. Profile Removal",
+                "paragraph": "Users may request removal of their profile at any time. Apna Vivah also reserves the right to remove any profile that violates these Terms & Conditions."
+            },
+            {
+                "title": "13. Changes to Terms",
+                "paragraph": "We may update these Terms & Conditions from time to time. Updated terms will be published on this page with the latest revision date."
+            },
+            {
+                "title": "14. Contact Us",
+                "paragraph": "If you have any questions regarding these Terms & Conditions, please contact us."
+            }
+        ],
+        "contact": {
+            "title": "Contact Information",
+            "phoneLabel": "Phone",
+            "emailLabel": "Email",
+            "addressLabel": "Address",
+            "phone": "+91 7017225698",
+            "email": "contact@apnavivah.com",
+            "address": "Ghaziabad, Uttar Pradesh, India"
+        }
+    },
+    "disclaimer": {
+        "pageTitle": "Disclaimer",
+        "hero": {
+            "title": "Website Disclaimer",
+            "subtitle": "Please read this disclaimer carefully before using Apna Vivah. By accessing or using our website, you acknowledge and agree to the terms mentioned below."
+        },
+        "sections": [
+            {
+                "title": "1. General Information",
+                "paragraph": "Apna Vivah is a matrimonial introduction platform that helps individuals and families connect for matrimonial purposes. We do not act as a marriage broker or guarantee any marriage outcome."
+            },
+            {
+                "title": "2. Profile Information",
+                "paragraph": "Profiles published on our platform are based on the information provided by users or their family members. Although we review profiles before publishing, we cannot guarantee the complete accuracy, completeness, or authenticity of every detail."
+            },
+            {
+                "title": "3. Independent Verification",
+                "paragraph": "Users and their families are strongly advised to independently verify all personal, educational, professional, financial, medical, and family information before making any matrimonial decision."
+            },
+            {
+                "title": "4. No Marriage Guarantee",
+                "paragraph": "Registration or membership on Apna Vivah does not guarantee a suitable match, engagement, or marriage. Matchmaking depends on individual preferences, compatibility, and mutual decisions."
+            },
+            {
+                "title": "5. User Responsibility",
+                "content": [
+                    "Provide genuine and accurate information.",
+                    "Respect the privacy of other members.",
+                    "Do not misuse contact details.",
+                    "Communicate respectfully with other users.",
+                    "Report any suspicious activity immediately."
+                ]
+            },
+            {
+                "title": "6. Third-Party Communication",
+                "paragraph": "Once users exchange contact information and communicate outside the platform, Apna Vivah is not responsible for their conversations, meetings, or decisions."
+            },
+            {
+                "title": "7. Limitation of Liability",
+                "paragraph": "Apna Vivah shall not be liable for any loss, damage, dispute, fraud, misunderstanding, or inconvenience arising from the use of this website or interactions between users."
+            },
+            {
+                "title": "8. Changes to Disclaimer",
+                "paragraph": "We reserve the right to modify or update this Disclaimer at any time. Any changes will be published on this page."
+            },
+            {
+                "title": "9. Contact Us",
+                "paragraph": "If you have any questions regarding this Disclaimer, please contact us."
+            }
+        ],
+        "contact": {
+            "title": "Contact Information",
+            "phoneLabel": "Phone",
+            "emailLabel": "Email",
+            "addressLabel": "Address",
+            "phone": "+91 7017225698",
+            "email": "contact@apnavivah.com",
+            "address": "Ghaziabad, Uttar Pradesh, India"
+        }
+    },
+    "refund": {
+        "pageTitle": "Refund & Cancellation Policy",
+        "hero": {
+            "title": "Refund & Cancellation Policy",
+            "subtitle": "Please read our Refund & Cancellation Policy carefully before purchasing any membership plan on Apna Vivah."
+        },
+        "sections": [
+            {
+                "title": "1. Membership Purchase",
+                "paragraph": "By purchasing any membership plan on Apna Vivah, you agree to this Refund & Cancellation Policy."
+            },
+            {
+                "title": "2. Refund Eligibility",
+                "paragraph": "A refund request can only be made within 24 hours of purchasing the membership."
+            },
+            {
+                "title": "3. Refund Conditions",
+                "content": [
+                    "Refund requests must be submitted within 24 hours of payment.",
+                    "No contact number or personal contact details of any profile should have been shared with you.",
+                    "No premium membership benefits should have been used.",
+                    "The payment must have been successfully received by Apna Vivah."
+                ]
+            },
+            {
+                "title": "4. Non-Refundable Situations",
+                "content": [
+                    "If you have received the contact number of any profile.",
+                    "If you have used premium membership features.",
+                    "If more than 24 hours have passed after payment.",
+                    "If the refund request violates our Terms & Conditions."
+                ]
+            },
+            {
+                "title": "5. Cancellation",
+                "paragraph": "You may request cancellation of your membership at any time. However, cancellation does not automatically make you eligible for a refund."
+            },
+            {
+                "title": "6. Refund Process",
+                "paragraph": "Once your request is approved, the refund will be processed to your original payment method within 5–7 working days."
+            },
+            {
+                "title": "7. Right to Reject Refund",
+                "paragraph": "Apna Vivah reserves the right to reject any refund request that does not satisfy the conditions mentioned in this policy."
+            },
+            {
+                "title": "8. Contact Us",
+                "paragraph": "If you have any questions regarding refunds or cancellations, please contact our support team."
+            }
+        ],
+        "contact": {
+            "title": "Contact Information",
+            "phoneLabel": "Phone",
+            "emailLabel": "Email",
+            "addressLabel": "Address",
+            "phone": "+91 7017225698",
+            "email": "contact@apnavivah.com",
+            "address": "Ghaziabad, Uttar Pradesh, India"
+        }
     }
 }

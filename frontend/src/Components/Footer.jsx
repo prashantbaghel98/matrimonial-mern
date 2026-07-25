@@ -117,25 +117,59 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-white/70 text-sm">
-          <p>
+
+        <div className="flex mt-5 -mb-5 flex-col items-center justify-between gap-5 text-center md:flex-row md:text-left">
+
+          {/* Copyright */}
+          <p className="text-sm text-white/70 leading-6">
             {t("footer.copyright")}{" "}
             <a
               href="https://worldtricks4u.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium hover:text-yellow-400"
+              className="font-semibold text-white hover:text-yellow-400 transition-colors duration-300"
             >
               Worldtricks4u
             </a>
           </p>
 
-          <p className="mt-4 md:mt-0">
-            Managed by{" "}
-            <span className="text-yellow-400 font-medium">
-              Vinod Kumar Baghel
-            </span>
-          </p>
+          {/* Footer Links */}
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-5 gap-y-2 text-sm">
+            <a
+              href="/"
+              className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
+            >
+              {t("footer.links.home")}
+            </a>
+
+            <a
+              href="/privacy-policy"
+              className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
+            >
+              {t("footer.links.privacyPolicy")}
+            </a>
+
+            <a
+              href="/terms"
+              className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
+            >
+              {t("footer.links.termsConditions")}
+            </a>
+
+            <a
+              href="/disclaimer"
+              className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
+            >
+              {t("footer.links.disclaimer")}
+            </a>
+
+            <a
+              href="/refund"
+              className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
+            >
+              {t("footer.links.refundPolicy")}
+            </a>
+          </div>
         </div>
       </div>
     </footer>
