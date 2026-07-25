@@ -143,14 +143,14 @@ const Footer = () => {
             </a>
 
             <a
-              href="/privacy-policy"
+              href="/privacy"
               className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
             >
               {t("footer.links.privacyPolicy")}
             </a>
 
             <a
-              href="/terms"
+              href="/terms-condition"
               className="text-white/70 hover:text-yellow-400 transition-colors duration-300"
             >
               {t("footer.links.termsConditions")}
