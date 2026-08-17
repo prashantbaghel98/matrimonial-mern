@@ -39,11 +39,11 @@ export const AuthProvider = ({ children }) => {
       console.log(err);
     }
 
-    setUser(null);
-    setToken(null);
-
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+
+    setUser(null);
+    setToken(null);
   };
 
   return (

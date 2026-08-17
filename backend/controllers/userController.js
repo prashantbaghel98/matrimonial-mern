@@ -100,12 +100,13 @@ const userLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // Cookie
+    // Cookie (Local + Production)
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/", // IMPORTANT
+      sameSite:
+        process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -136,8 +137,9 @@ const userLogin = async (req, res) => {
 const userLogout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
+    sameSite:
+      process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
   });
 
@@ -148,12 +150,14 @@ const userLogout = (req, res) => {
 };
 
 // ======================================================
-// GET USER PROFILE
+// GET LOGGED IN USER
 // ======================================================
 
 const userProfile = async (req, res) => {
   try {
-    const user = await userModel.findById(req.userId).select("-password");
+    const user = await userModel
+      .findById(req.userId)
+      .select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -205,6 +209,8 @@ const userProfileUpdate = async (req, res) => {
       data: updatedUser,
     });
   } catch (error) {
+    console.log("UPDATE PROFILE ERROR:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
