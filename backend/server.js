@@ -40,7 +40,7 @@ app.use("/api/finance",financeRoute);
 app.get("/sitemap.xml", siteMap);
 
 
-app.use('/',(req,res)=>{
+app.get('/',(req,res)=>{
   res.send("API Working")
 })
 
