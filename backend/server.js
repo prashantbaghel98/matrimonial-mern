@@ -13,7 +13,14 @@ const { siteMap } = require('./controllers/siteMap');
 
 // Middleware 
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://apnavivah.in",
+    "https://www.apnavivah.in"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); // for form submissions

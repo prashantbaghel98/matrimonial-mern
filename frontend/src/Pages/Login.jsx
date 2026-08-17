@@ -26,7 +26,9 @@ const Login = () => {
         {
           username,
           password,
-        }
+        }, {
+        withCredentials: true
+      }
       );
 
       // SAVE USER + TOKEN

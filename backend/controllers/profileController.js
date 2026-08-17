@@ -302,36 +302,39 @@ const deleteProfile = async (req, res) => {
 // ======================================================
 
 const getProfileById = async (req, res) => {
-
   try {
-
-    const profile = await profileModel.findById(
-      req.params.id
-    );
-
+    const profile = await profileModel.findById(req.params.id).lean();
+    console.log("ROLE:", req.userRole);
     if (!profile) {
-
       return res.status(404).json({
         success: false,
         message: "Profile not found"
       });
-
     }
 
-    res.status(200).json(profile);
+    // Sirf admin ko asli data dikhega
+    if (req.userRole !== "admin") {
+      profile.contactNo = "Subscription Required";
+      profile.fullAddress = "Subscription Required";
+    }
+
+    res.status(200).json({
+      success: true,
+      profile
+    });
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
       success: false,
       message: error.message
     });
-
   }
-
 };
+
+
+
 
 
 // ======================================================
@@ -339,53 +342,41 @@ const getProfileById = async (req, res) => {
 // ======================================================
 
 const getAllProfile = async (req, res) => {
-
   try {
-
     const page = parseInt(req.query.page) || 1;
-
     const limit = 1000;
-
     const skip = (page - 1) * limit;
 
-    const [profiles, total] = await Promise.all([
+    const projection =
+      req.userRole === "admin"
+        ? ""
+        : "-contactNo -fullAddress";
 
+    const [profiles, total] = await Promise.all([
       profileModel
         .find({})
+        .select(projection)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
 
       profileModel.countDocuments()
-
     ]);
 
     res.status(200).json({
-
       success: true,
-
       profiles,
-
       total,
-
       page,
-
       totalPages: Math.ceil(total / limit)
-
     });
-
   } catch (error) {
-
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message
     });
-
   }
-
 };
 
 

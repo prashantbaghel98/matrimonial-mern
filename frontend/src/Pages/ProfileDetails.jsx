@@ -88,14 +88,21 @@ ${frontendUrl}
 
 
   useEffect(() => {
-    const fetchProfile = async () => {
+  const fetchProfile = async () => {
+    try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/profile/${id}`
+        `${import.meta.env.VITE_API_URL}/api/profile/${id}`,
+        { withCredentials: true }
       );
-      setProfile(res.data);
-    };
-    fetchProfile();
-  }, [id]);
+
+      setProfile(res.data.profile); // ✅
+    } catch (err) {
+      console.log(err.response?.data);
+    }
+  };
+
+  fetchProfile();
+}, [id]);
 
   // ✅ FINAL PDF FUNCTION (NO UI CHANGE)
   const downloadImage = async () => {
@@ -155,9 +162,7 @@ clone.classList.add("download-mode");
 
       <Helmet>
 
-        <title>
-          {profile.name} Biodata
-        </title>
+         <title>{`${profile?.name || "Profile"} Biodata`}</title>
 
         <meta
           property="og:title"
