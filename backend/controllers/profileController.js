@@ -313,10 +313,10 @@ const getProfileById = async (req, res) => {
     }
 
     // Sirf admin ko asli data dikhega
-    if (req.userRole !== "admin") {
-      profile.contactNo = "Subscription Required";
-      profile.fullAddress = "Subscription Required";
-    }
+    // if (req.userRole !== "admin") {
+    //   profile.contactNo = "Subscription Required";
+    //   profile.fullAddress = "Subscription Required";
+    // }
 
     res.status(200).json({
       success: true,

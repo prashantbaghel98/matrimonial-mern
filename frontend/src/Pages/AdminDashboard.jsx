@@ -86,39 +86,31 @@ const AdminDashboard = () => {
   // FETCH ALL PROFILES
   // ======================================================
 
-  useEffect(() => {
+useEffect(() => {
+  const fetchProfiles = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const fetchProfiles = async () => {
+      setProfiles(res.data.profiles || []);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to load profiles");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/profile`
-        );
-
-        setProfiles(
-          res.data.profiles || []
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        toast.error(
-          "Failed to load profiles"
-        );
-
-      } finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
+  if (token) {
     fetchProfiles();
-
-  }, []);
+  }
+}, [token]);
 
   // ======================================================
   // DELETE PROFILE
@@ -169,37 +161,17 @@ const AdminDashboard = () => {
   // SEARCH FILTER
   // ======================================================
 
-  const filteredProfiles =
-    profiles.filter((item) => {
+const filteredProfiles = profiles.filter((item) => {
+  const searchValue = search.toLowerCase().trim();
 
-      const searchValue =
-        search.toLowerCase();
-
-      return (
-
-        item?.name
-          ?.toLowerCase()
-          .includes(searchValue) ||
-
-        item?.fatherName
-          ?.toLowerCase()
-          .includes(searchValue) ||
-
-        item?.motherName
-          ?.toLowerCase()
-          .includes(searchValue) ||
-
-        item?.city
-          ?.toLowerCase()
-          .includes(searchValue) ||
-
-        item?.contactNo
-          ?.toLowerCase()
-          .includes(searchValue)
-
-      );
-
-    });
+  return (
+    (item.name || "").toLowerCase().includes(searchValue) ||
+    (item.fatherName || "").toLowerCase().includes(searchValue) ||
+    (item.motherName || "").toLowerCase().includes(searchValue) ||
+    (item.city || "").toLowerCase().includes(searchValue) ||
+    String(item.contactNo || "").includes(searchValue)
+  );
+});
 
   // ======================================================
   // LOADING

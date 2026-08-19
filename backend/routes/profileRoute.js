@@ -10,9 +10,9 @@ const {
 
 
 router.get("/check",checkDuplicate)
-router.get('/',getAllProfile)
+router.get('/',optionalAuth,getAllProfile)
 router.get('/my-biodata',authMiddleware,getMyBiodata)
-router.get("/share/:id", getSharePage);
+router.get("/share/:id", optionalAuth,getSharePage);
 router.get('/:id',optionalAuth,getProfileById)
 router.post("/create",authMiddleware,upload.single("photo"),createProfile)
 router.put('/update/:id',authMiddleware , upload.single("photo"),updateProfile)

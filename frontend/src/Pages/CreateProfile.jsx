@@ -34,21 +34,49 @@ const CreateProfile = ({ mode = "create" }) => {
 };
 
   // Fetch existing profile data if update mode
-  useEffect(() => {
-    if (mode === "update" && id) {
-      const fetchProfile = async () => {
-        try {
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile/${id}`);
-          setFormData(res.data);
-          if (res.data.photo) setPreview(res.data.photo);
-        } catch (err) {
-          console.error(err);
-          setMessage("Failed to fetch profile data");
-        }
-      };
-      fetchProfile();
-    }
-  }, [mode, id]);
+ useEffect(() => {
+  if (mode === "update" && id) {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/profile/${id}`
+        );
+
+        const profile = res.data.profile || res.data;
+
+        setFormData({
+          name: profile.name || "",
+          dob: profile.dob ? profile.dob.split("T")[0] : "",
+          time: profile.time || "",
+          place: profile.place || "",
+          height: profile.height || "",
+          colour: profile.colour || "",
+          education: profile.education || "",
+          occupation: profile.occupation || "",
+          income: profile.income || "",
+          gotraFather: profile.gotraFather || "",
+          gotraMother: profile.gotraMother || "",
+          fatherName: profile.fatherName || "",
+          fatherOccupation: profile.fatherOccupation || "",
+          motherName: profile.motherName || "",
+          motherOccupation: profile.motherOccupation || "",
+          fullAddress: profile.fullAddress || "",
+          city: profile.city || "",
+          residenceAddress: profile.residenceAddress || "",
+          contactNo: profile.contactNo || "",
+          gender: profile.gender || "",
+          maritalStatus: profile.maritalStatus || "",
+        });
+
+        setPreview(profile.photo || null);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+  }
+}, [id, mode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

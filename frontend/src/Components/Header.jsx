@@ -4,6 +4,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const { t } = useTranslation();
@@ -15,9 +16,16 @@ const Header = () => {
   const closeMenu = () => setIsOpen(false);
 
   const handleLogout = async () => {
-    await logout();
-    closeMenu();
-    navigate("/login");
+    try {
+      await logout();
+
+      toast.success("Logout successful!");
+
+      closeMenu();
+      navigate("/login");
+    } catch (error) {
+      toast.error("Logout failed!");
+    }
   };
 
   useEffect(() => {
@@ -34,10 +42,9 @@ const Header = () => {
   }, [isOpen]);
 
   const navLinkClass = ({ isActive }) =>
-    `pb-1 transition-all duration-300 ${
-      isActive
-        ? "text-red-600 border-b-2 border-red-600 font-semibold"
-        : "text-gray-700 hover:text-red-600"
+    `pb-1 transition-all duration-300 ${isActive
+      ? "text-red-600 border-b-2 border-red-600 font-semibold"
+      : "text-gray-700 hover:text-red-600"
     }`;
 
   return (
@@ -147,16 +154,14 @@ const Header = () => {
       {/* Overlay */}
       <div
         onClick={closeMenu}
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
       />
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b">
