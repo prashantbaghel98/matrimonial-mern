@@ -22,6 +22,17 @@ import Loader from "../Components/Loader";
 const PLACEHOLDER_IMG = "https://placehold.co/300x400?text=No+Photo";
 const API_URL = import.meta.env.VITE_API_URL;
 
+const optimizeImage = (url, width = 400) => {
+  if (!url || url.includes("placehold.co")) {
+    return url;
+  }
+
+  return url.replace(
+    "/profiles/",
+    `/tr:w-${width},q-80,f-webp/profiles/`
+  );
+};
+
 const BrowseProfiles = () => {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
@@ -89,7 +100,7 @@ const BrowseProfiles = () => {
     if (!hasLoadedFromStorage.current) return; // avoid overwriting saved data on first render
     sessionStorage.setItem(
       "browseFilters",
-      JSON.stringify({nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage })
+      JSON.stringify({ nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage })
     );
   }, [nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage]);
 
@@ -599,9 +610,12 @@ const BrowseProfiles = () => {
         {profiles.map((profile) => (
           <div key={profile._id} className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden">
             <img
-              src={profile.photo || PLACEHOLDER_IMG}
+              src={optimizeImage(profile.photo, 400) || PLACEHOLDER_IMG}
               alt={profile.name}
               loading="lazy"
+              decoding="async"
+              width="400"
+              height="300"
               className="w-full h-[300px] object-cover object-top cursor-pointer hover:opacity-90 transition"
               onClick={() => setSelectedImage(profile.photo || PLACEHOLDER_IMG)}
             />
@@ -633,7 +647,7 @@ const BrowseProfiles = () => {
                 <button
                   onClick={() => {
                     sessionStorage.setItem("browseScrollPosition", window.scrollY);
-                   navigate(`/browse-profile/${profile._id}`);
+                    navigate(`/browse-profile/${profile._id}`);
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
                 >

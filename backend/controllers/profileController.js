@@ -1,10 +1,12 @@
 const profileModel = require("../models/profileModel");
 const imagekit = require("../config/imagekit");
+const sharp = require("sharp");
 
 
 // ======================================================
 // CREATE PROFILE
 // ======================================================
+
 
 const createProfile = async (req, res) => {
 
@@ -37,34 +39,34 @@ const createProfile = async (req, res) => {
     // CHECK USER ALREADY CREATED BIODATA
     // ======================================================
 
-   if (req.userRole !== "admin") {
+    if (req.userRole !== "admin") {
 
-  const alreadyCreated =
-  await profileModel.findOne({
-    user: req.userId
-  });
+      const alreadyCreated =
+        await profileModel.findOne({
+          user: req.userId
+        });
 
-  if (alreadyCreated) {
+      if (alreadyCreated) {
 
-    return res.status(400).json({
-      success: false,
-      message:
-      "You already created your biodata"
-    });
+        return res.status(400).json({
+          success: false,
+          message: "You already created your biodata"
+        });
 
-  }
+      }
 
-}
+    }
 
     // ======================================================
     // CHECK DUPLICATE BIODATA
     // ======================================================
 
-    const existingProfile = await profileModel.findOne({
-      name,
-      fatherName,
-      contactNo
-    });
+    const existingProfile =
+      await profileModel.findOne({
+        name,
+        fatherName,
+        contactNo
+      });
 
     if (existingProfile) {
 
@@ -76,22 +78,37 @@ const createProfile = async (req, res) => {
     }
 
     // ======================================================
-    // IMAGE UPLOAD
+    // IMAGE UPLOAD + OPTIMIZATION
     // ======================================================
 
     let photoUrl = "";
 
     if (req.file) {
 
-      const file = req.file.buffer;
+      // Optimize uploaded image
+      const optimizedImage = await sharp(req.file.buffer)
+        .resize({
+          width: 1200,
+          height: 1200,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .webp({
+          quality: 80
+        })
+        .toBuffer();
 
-      const fileName = req.file.originalname;
+      // New WebP filename
+      const fileName =
+        `profile-${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
 
-      const uploadResponse = await imagekit.upload({
-        file,
-        fileName,
-        folder: "/profiles"
-      });
+      // Upload optimized image to ImageKit
+      const uploadResponse =
+        await imagekit.upload({
+          file: optimizedImage,
+          fileName,
+          folder: "/profiles"
+        });
 
       photoUrl = uploadResponse.url;
 
@@ -149,9 +166,12 @@ const createProfile = async (req, res) => {
 };
 
 
+
+
 // ======================================================
 // UPDATE PROFILE
 // ======================================================
+
 
 const updateProfile = async (req, res) => {
 
@@ -189,21 +209,37 @@ const updateProfile = async (req, res) => {
     const updateData = { ...req.body };
 
     // ======================================================
-    // IMAGE UPDATE
+    // IMAGE UPDATE + OPTIMIZATION
     // ======================================================
 
     if (req.file) {
 
-      const file = req.file.buffer;
+      // Optimize uploaded image
+      const optimizedImage = await sharp(req.file.buffer)
+        .resize({
+          width: 1200,
+          height: 1200,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .webp({
+          quality: 80
+        })
+        .toBuffer();
 
-      const fileName = req.file.originalname;
+      // Generate unique WebP filename
+      const fileName =
+        `profile-${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
 
-      const uploadResponse = await imagekit.upload({
-        file,
-        fileName,
-        folder: "/profiles"
-      });
+      // Upload optimized image to ImageKit
+      const uploadResponse =
+        await imagekit.upload({
+          file: optimizedImage,
+          fileName,
+          folder: "/profiles"
+        });
 
+      // Save new image URL
       updateData.photo = uploadResponse.url;
 
     }
