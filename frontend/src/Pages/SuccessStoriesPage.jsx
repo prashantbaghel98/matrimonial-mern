@@ -5,21 +5,21 @@ import { useTranslation } from "react-i18next";
 
 const StoryCard = ({ story, photo }) => {
   return (
-    <div className="bg-[#f1ece6] rounded-3xl shadow-md overflow-hidden border border-[#e6ddd4] hover:shadow-xl transition">
-      <div className="relative bg-gradient-to-r from-[#9b1c2f] to-[#ff7a18] h-60 flex items-center justify-center">
+    <div className="bg-[#f1ece6] rounded-3xl my-2 sm:my-0 shadow-md overflow-hidden border border-[#e6ddd4] hover:shadow-xl transition">
+      <div className="relative bg-gradient-to-r from-[#9b1c2f] to-[#ff7a18] h-100 flex items-center justify-center">
 
         <img
           src={photo}
           alt={story.couple}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-top"
         />
 
-        <span className="absolute -bottom-5 left-4 bg-yellow-400 text-black text-xs px-3 py-1 rounded-full font-medium">
+        <span className="absolute -bottom-8 left-4 bg-yellow-400 text-black text-xs px-3 py-1 rounded-full font-medium">
           {story.community}
         </span>
       </div>
 
-      <div className="p-6 mt-10">
+      <div className="p-6 mt-5">
         <h3 className="text-lg font-semibold text-[#2d2a26]">
           {story.couple}
         </h3>
@@ -28,10 +28,6 @@ const StoryCard = ({ story, photo }) => {
           <MapPin size={14} />
           {story.location}
         </div>
-
-        <p className="text-gray-600 mt-4 text-sm leading-relaxed">
-          "{story.story}"
-        </p>
       </div>
     </div>
   );
@@ -49,12 +45,8 @@ const SuccessStoriesPage = () => {
   });
 
   const photos = [
-    "/success-story-1.jpg",
-    "/success-story-2.jpg",
-    "/success-story-3.jpg",
-    "/success-story-4.jpg",
-    "/success-story-5.jpg",
-    "/success-story-6.jpg",
+    "/success-story-1.jpeg",
+    "/success-story-2.jpeg",
   ];
 
   return (

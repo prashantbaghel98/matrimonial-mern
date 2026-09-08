@@ -264,6 +264,7 @@
                 ]
             }
         ],
+        "choosePlan": "Buy Now",
         "helpCTA": {
             "title": "Need Help Choosing?",
             "description": "Contact us directly and we'll recommend the best plan for your needs.",
@@ -336,39 +337,13 @@
         "stories": [
             {
                 "community": "Baghel Community",
-                "couple": "Rahul & Neha",
-                "location": "Indore, MP",
-                "story": "We both were looking for someone who understood our values and traditions. Apna Vivah connected us, and within three months, our families met. Today, we are happily married and grateful for this platform."
+                "couple": "Sudheer Pal & Rajeshwari Pal",
+                "location": "Ghaziabad, Uttar Pradesh ( Feburary 2026)"
             },
             {
                 "community": "Pal Community",
-                "couple": "Vijay & Priyanka",
-                "location": "Bhopal, MP",
-                "story": "After searching for two years on other platforms, we found each other through Apna Vivah. The personal attention from Vinod Ji made all the difference."
-            },
-            {
-                "community": "Dhangar Community",
-                "couple": "Sunil & Meena",
-                "location": "Ujjain, MP",
-                "story": "What we loved about Apna Vivah was how they understood our community values. The matching was perfect."
-            },
-            {
-                "community": "Baghel Community",
-                "couple": "Deepak & Anita",
-                "location": "Gwalior, MP",
-                "story": "The premium membership was worth every rupee. We received personalized recommendations that truly matched our preferences."
-            },
-            {
-                "community": "Pal Community",
-                "couple": "Arun & Sunita",
-                "location": "Jabalpur, MP",
-                "story": "Our parents were worried about finding a suitable match. Apna Vivah's verification process gave them complete confidence."
-            },
-            {
-                "community": "Dhangar Community",
-                "couple": "Kiran & Rekha",
-                "location": "Ratlam, MP",
-                "story": "Quick, efficient, and trustworthy. Within weeks of registering, we found our perfect match."
+                "couple": "Jitendra & Anshika",
+                "location": "Delhi ( April 2026)"
             }
         ],
         "statistics": [
