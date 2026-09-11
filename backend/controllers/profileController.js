@@ -380,15 +380,6 @@ const getProfileById = async (req, res) => {
 const getAllProfile = async (req, res) => {
   try {
 
-    const page = Math.max(
-      parseInt(req.query.page) || 1,
-      1
-    );
-    const limit = 28;
-
-    const skip = (page - 1) * limit;
-
-
     // ======================================================
     // GET FILTER VALUES
     // ======================================================
@@ -476,9 +467,10 @@ const getAllProfile = async (req, res) => {
 
       const today = new Date();
 
-      let dobFilter = {};
+      const dobFilter = {};
 
 
+      // Minimum age
       if (minAge) {
 
         const minAgeNumber = Number(minAge);
@@ -498,7 +490,7 @@ const getAllProfile = async (req, res) => {
       }
 
 
-
+      // Maximum age
       if (maxAge) {
 
         const maxAgeNumber = Number(maxAge);
@@ -535,17 +527,37 @@ const getAllProfile = async (req, res) => {
 
       filter.income = {};
 
+
       if (minIncome) {
 
-        filter.income.$gte =
-          Number(minIncome);
+        const minIncomeNumber = Number(minIncome);
+
+        if (!isNaN(minIncomeNumber)) {
+
+          filter.income.$gte = minIncomeNumber;
+
+        }
 
       }
 
+
       if (maxIncome) {
 
-        filter.income.$lte =
-          Number(maxIncome);
+        const maxIncomeNumber = Number(maxIncome);
+
+        if (!isNaN(maxIncomeNumber)) {
+
+          filter.income.$lte = maxIncomeNumber;
+
+        }
+
+      }
+
+
+      // Remove empty income filter
+      if (Object.keys(filter.income).length === 0) {
+
+        delete filter.income;
 
       }
 
@@ -556,6 +568,7 @@ const getAllProfile = async (req, res) => {
     // DEBUG
     // ======================================================
 
+    console.log("USER ROLE:", req.userRole);
     console.log("PROFILE FILTER:", filter);
 
 
@@ -570,25 +583,79 @@ const getAllProfile = async (req, res) => {
 
 
     // ======================================================
-    // GET FILTERED PROFILES
+    // ADMIN
+    // ======================================================
+    // ADMIN KO KOI LIMIT NAHI HAI
+    // ADMIN KO SAARE MATCHING PROFILES MILENGE
     // ======================================================
 
-    const [profiles, total] =
-      await Promise.all([
+    if (req.userRole === "admin") {
 
-        profileModel
-          .find(filter)
-          .select(projection)
-          .sort({
-            createdAt: -1
-          })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
+      const profiles = await profileModel
+        .find(filter)
+        .select(projection)
+        .sort({
+          createdAt: -1
+        })
+        .lean();
 
-        profileModel.countDocuments(filter)
 
-      ]);
+      return res.status(200).json({
+
+        success: true,
+
+        profiles,
+
+        total: profiles.length,
+
+        // Admin ke liye pagination nahi
+        page: 1,
+
+        limit: profiles.length,
+
+        totalPages: 1,
+
+        hasMore: false
+
+      });
+
+    }
+
+
+    // ======================================================
+    // NORMAL USER
+    // ======================================================
+    // NORMAL USER KE LIYE LIMIT = 28
+    // ======================================================
+
+    const page = Math.max(
+      parseInt(req.query.page) || 1,
+      1
+    );
+
+    const limit = 28;
+
+    const skip = (page - 1) * limit;
+
+
+    const [
+      profiles,
+      total
+    ] = await Promise.all([
+
+      profileModel
+        .find(filter)
+        .select(projection)
+        .sort({
+          createdAt: -1
+        })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      profileModel.countDocuments(filter)
+
+    ]);
 
 
     // ======================================================
@@ -598,16 +665,15 @@ const getAllProfile = async (req, res) => {
     const totalPages =
       Math.ceil(total / limit);
 
-
     const hasMore =
       page < totalPages;
 
 
     // ======================================================
-    // RESPONSE
+    // NORMAL USER RESPONSE
     // ======================================================
 
-    res.status(200).json({
+    return res.status(200).json({
 
       success: true,
 
@@ -633,7 +699,8 @@ const getAllProfile = async (req, res) => {
       error
     );
 
-    res.status(500).json({
+
+    return res.status(500).json({
 
       success: false,
 
