@@ -374,44 +374,273 @@ const getProfileById = async (req, res) => {
 
 
 // ======================================================
-// GET ALL PROFILES
+// GET ALL PROFILES WITH FILTER + PAGINATION
 // ======================================================
 
 const getAllProfile = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 1000;
+
+    const page = Math.max(
+      parseInt(req.query.page) || 1,
+      1
+    );
+    const limit = 28;
+
     const skip = (page - 1) * limit;
+
+
+    // ======================================================
+    // GET FILTER VALUES
+    // ======================================================
+
+    const {
+      name,
+      gender,
+      city,
+      maritalStatus,
+      minAge,
+      maxAge,
+      minIncome,
+      maxIncome
+    } = req.query;
+
+
+    // ======================================================
+    // BUILD FILTER
+    // ======================================================
+
+    const filter = {};
+
+
+    // ======================================================
+    // NAME FILTER
+    // ======================================================
+
+    if (name && name.trim()) {
+
+      filter.name = {
+        $regex: name.trim(),
+        $options: "i"
+      };
+
+    }
+
+
+    // ======================================================
+    // GENDER FILTER
+    // ======================================================
+
+    if (gender && gender.trim()) {
+
+      filter.gender = {
+        $regex: `^${gender.trim()}$`,
+        $options: "i"
+      };
+
+    }
+
+
+    // ======================================================
+    // CITY FILTER
+    // ======================================================
+
+    if (city && city.trim()) {
+
+      filter.city = {
+        $regex: city.trim(),
+        $options: "i"
+      };
+
+    }
+
+
+    // ======================================================
+    // MARITAL STATUS FILTER
+    // ======================================================
+
+    if (maritalStatus && maritalStatus.trim()) {
+
+      filter.maritalStatus = {
+        $regex: `^${maritalStatus.trim()}$`,
+        $options: "i"
+      };
+
+    }
+
+
+    // ======================================================
+    // AGE FILTER
+    // ======================================================
+
+    if (minAge || maxAge) {
+
+      const today = new Date();
+
+      let dobFilter = {};
+
+
+      if (minAge) {
+
+        const minAgeNumber = Number(minAge);
+
+        if (!isNaN(minAgeNumber)) {
+
+          const maxDob = new Date(today);
+
+          maxDob.setFullYear(
+            today.getFullYear() - minAgeNumber
+          );
+
+          dobFilter.$lte = maxDob;
+
+        }
+
+      }
+
+
+
+      if (maxAge) {
+
+        const maxAgeNumber = Number(maxAge);
+
+        if (!isNaN(maxAgeNumber)) {
+
+          const minDob = new Date(today);
+
+          minDob.setFullYear(
+            today.getFullYear() - maxAgeNumber - 1
+          );
+
+          dobFilter.$gte = minDob;
+
+        }
+
+      }
+
+
+      if (Object.keys(dobFilter).length > 0) {
+
+        filter.dob = dobFilter;
+
+      }
+
+    }
+
+
+    // ======================================================
+    // INCOME FILTER
+    // ======================================================
+
+    if (minIncome || maxIncome) {
+
+      filter.income = {};
+
+      if (minIncome) {
+
+        filter.income.$gte =
+          Number(minIncome);
+
+      }
+
+      if (maxIncome) {
+
+        filter.income.$lte =
+          Number(maxIncome);
+
+      }
+
+    }
+
+
+    // ======================================================
+    // DEBUG
+    // ======================================================
+
+    console.log("PROFILE FILTER:", filter);
+
+
+    // ======================================================
+    // PROJECTION
+    // ======================================================
 
     const projection =
       req.userRole === "admin"
         ? ""
         : "-contactNo -fullAddress";
 
-    const [profiles, total] = await Promise.all([
-      profileModel
-        .find({})
-        .select(projection)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
 
-      profileModel.countDocuments()
-    ]);
+    // ======================================================
+    // GET FILTERED PROFILES
+    // ======================================================
+
+    const [profiles, total] =
+      await Promise.all([
+
+        profileModel
+          .find(filter)
+          .select(projection)
+          .sort({
+            createdAt: -1
+          })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+
+        profileModel.countDocuments(filter)
+
+      ]);
+
+
+    // ======================================================
+    // PAGINATION
+    // ======================================================
+
+    const totalPages =
+      Math.ceil(total / limit);
+
+
+    const hasMore =
+      page < totalPages;
+
+
+    // ======================================================
+    // RESPONSE
+    // ======================================================
 
     res.status(200).json({
+
       success: true,
+
       profiles,
+
       total,
+
       page,
-      totalPages: Math.ceil(total / limit)
+
+      limit,
+
+      totalPages,
+
+      hasMore
+
     });
+
+
   } catch (error) {
+
+    console.error(
+      "Get all profiles error:",
+      error
+    );
+
     res.status(500).json({
+
       success: false,
+
       message: error.message
+
     });
+
   }
 };
 

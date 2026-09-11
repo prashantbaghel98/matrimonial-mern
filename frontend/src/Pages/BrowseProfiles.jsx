@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
+
 import {
   Filter,
   X,
@@ -13,14 +20,18 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import Loader from "../Components/Loader";
 
-const PLACEHOLDER_IMG = "https://placehold.co/300x400?text=No+Photo";
 const API_URL = import.meta.env.VITE_API_URL;
+const LIMIT = 25;
+
+const PLACEHOLDER_IMG =
+  "https://placehold.co/300x400?text=No+Photo";
 
 const optimizeImage = (url, width = 400) => {
   if (!url || url.includes("placehold.co")) {
@@ -33,708 +44,1177 @@ const optimizeImage = (url, width = 400) => {
   );
 };
 
+const getSavedFilters = () => {
+  try {
+    return JSON.parse(
+      sessionStorage.getItem("browseFilters") || "{}"
+    );
+  } catch {
+    return {};
+  }
+};
+
 const BrowseProfiles = () => {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  const saved = useRef(getSavedFilters()).current;
+
   const [profiles, setProfiles] = useState([]);
-  const [allProfiles, setAllProfiles] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [selectedImage, setSelectedImage] =
+    useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(saved.currentPage) || 1
+  );
 
-  // Filters (applied instantly)
-  const [nameSearch, setNameSearch] = useState("");
-  const [gender, setGender] = useState("");
-  const [maritalStatus, setMaritalStatus] = useState("");
-  const [ageRange, setAgeRange] = useState("");
-  const [incomeRange, setIncomeRange] = useState("");
+  const [totalCount, setTotalCount] =
+    useState(0);
 
-  // City has its own "raw" input + debounced value, so we don't refetch on every keystroke
-  const [cityInput, setCityInput] = useState("");
-  const [city, setCity] = useState("");
+  const [hasMore, setHasMore] =
+    useState(false);
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [nameSearch, setNameSearch] =
+    useState(saved.nameSearch || "");
 
-  // Ref used only to skip saving-to-sessionStorage on the very first render
-  const hasLoadedFromStorage = useRef(false);
-  const abortControllerRef = useRef(null);
+  const [gender, setGender] =
+    useState(saved.gender || "");
 
-  // ---------- Helpers ----------
+  const [cityInput, setCityInput] =
+    useState(saved.city || "");
+
+  const [city, setCity] =
+    useState(saved.city || "");
+
+  const [maritalStatus, setMaritalStatus] =
+    useState(saved.maritalStatus || "");
+
+  const [ageRange, setAgeRange] =
+    useState(saved.ageRange || "");
+
+  const [incomeRange, setIncomeRange] =
+    useState(saved.incomeRange || "");
+
+  const [showFilters, setShowFilters] =
+    useState(false);
+
+  // Initial page restore control
+  const firstLoad = useRef(true);
+
+  // Important:
+  // Jab tak saved pages load nahi ho jaate,
+  // profile scroll restoration nahi chalega.
+  const restoringBrowse = useRef(true);
+
+  // ---------------- AGE ----------------
+
   const calculateAge = (dob) => {
     if (!dob) return 0;
+
     const birthDate = new Date(dob);
-    const diff = Date.now() - birthDate.getTime();
-    const ageDate = new Date(diff);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
+    const today = new Date();
+
+    let age =
+      today.getFullYear() -
+      birthDate.getFullYear();
+
+    const month =
+      today.getMonth() -
+      birthDate.getMonth();
+
+    if (
+      month < 0 ||
+      (month === 0 &&
+        today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
   };
 
-  // ---------- Load saved filters (once, on mount) ----------
-  useEffect(() => {
-    const savedFilters = sessionStorage.getItem("browseFilters");
-    if (savedFilters) {
-      try {
-        const filters = JSON.parse(savedFilters);
-        setNameSearch(filters.nameSearch || "");
-        setGender(filters.gender || "");
-        setCity(filters.city || "");
-        setCityInput(filters.city || "");
-        setMaritalStatus(filters.maritalStatus || "");
-        setAgeRange(filters.ageRange || "");
-        setIncomeRange(filters.incomeRange || "");
-        setCurrentPage(filters.currentPage || 1);
-      } catch {
-        sessionStorage.removeItem("browseFilters");
+  // ---------------- PARAMS ----------------
+
+  const getParams = useCallback(
+    (page) => {
+      const params = {
+        page,
+        limit: LIMIT,
+      };
+
+      if (nameSearch.trim()) {
+        params.name = nameSearch.trim();
       }
-    }
-    hasLoadedFromStorage.current = true;
-  }, []);
 
-  // ---------- Persist filters ----------
-  useEffect(() => {
-    if (!hasLoadedFromStorage.current) return; // avoid overwriting saved data on first render
-    sessionStorage.setItem(
-      "browseFilters",
-      JSON.stringify({ nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage })
-    );
-  }, [nameSearch, gender, city, maritalStatus, ageRange, incomeRange, currentPage]);
+      if (gender) {
+        params.gender = gender;
+      }
 
-  // ---------- Debounce the city text input ----------
+      if (city.trim()) {
+        params.city = city.trim();
+      }
+
+      if (maritalStatus) {
+        params.maritalStatus =
+          maritalStatus;
+      }
+
+      if (ageRange) {
+        const [minAge, maxAge] =
+          ageRange.split("-");
+
+        params.minAge = minAge;
+        params.maxAge = maxAge;
+      }
+
+      if (incomeRange) {
+        const [minIncome, maxIncome] =
+          incomeRange.split("-");
+
+        params.minIncome = minIncome;
+        params.maxIncome = maxIncome;
+      }
+
+      return params;
+    },
+    [
+      nameSearch,
+      gender,
+      city,
+      maritalStatus,
+      ageRange,
+      incomeRange,
+    ]
+  );
+
+  // ---------------- FETCH PAGE ----------------
+
+  const fetchPage = useCallback(
+    async (page, append = false) => {
+      const response = await axios.get(
+        `${API_URL}/api/profile`,
+        {
+          params: getParams(page),
+        }
+      );
+
+      const data = response.data;
+
+      const newProfiles =
+        data.profiles || [];
+
+      setProfiles((prev) =>
+        append
+          ? [...prev, ...newProfiles]
+          : newProfiles
+      );
+
+      setTotalCount(
+        Number(data.total) || 0
+      );
+
+      setCurrentPage(
+        Number(data.page) || page
+      );
+
+      setHasMore(
+        Boolean(data.hasMore)
+      );
+    },
+    [getParams]
+  );
+
+  // ---------------- CITY DEBOUNCE ----------------
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setCity(cityInput.trim());
     }, 400);
+
     return () => clearTimeout(timer);
   }, [cityInput]);
 
-  // ---------- Reset to page 1 whenever a filter changes (not when page itself changes) ----------
-  useEffect(() => {
-    if (!hasLoadedFromStorage.current) return;
-    setCurrentPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameSearch, gender, city, maritalStatus, ageRange, incomeRange]);
-
-  // ---------- Restore scroll position once, then clear it ----------
-  useEffect(() => {
-    const savedPosition = sessionStorage.getItem("browseScrollPosition");
-    if (savedPosition && profiles.length > 0) {
-      const t = setTimeout(() => {
-        window.scrollTo(0, Number(savedPosition));
-        sessionStorage.removeItem("browseScrollPosition"); // only restore once
-      }, 100);
-      return () => clearTimeout(t);
-    }
-  }, [profiles]);
-
-
-
-  // ---------- Fetch all profiles ----------
+  // ---------------- INITIAL LOAD ----------------
 
   useEffect(() => {
-    const fetchProfiles = async () => {
+    if (!firstLoad.current) return;
+
+    firstLoad.current = false;
+
+    const loadProfiles = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await axios.get(
-          `${API_URL}/api/profile`
+        const savedPage = Math.max(
+          Number(saved.currentPage) || 1,
+          1
         );
 
-        const profileData =
-          res.data.profiles || [];
-
-        setAllProfiles(profileData);
-
-      } catch (error) {
+        // Saved page tak saare previous pages load
+        for (
+          let page = 1;
+          page <= savedPage;
+          page++
+        ) {
+          await fetchPage(
+            page,
+            page > 1
+          );
+        }
+      } catch (err) {
         console.error(
-          "Profile fetch error:",
-          error
+          "Initial profile load:",
+          err
         );
 
         setError(
-          error.response?.data
-            ?.message ||
-          "Failed to load profiles"
+          err.response?.data?.message ||
+            "Failed to load profiles"
         );
-
       } finally {
         setLoading(false);
+
+        // Ab saved pages completely load ho chuke hain
+        restoringBrowse.current = false;
       }
     };
 
-    fetchProfiles();
+    loadProfiles();
+  }, [fetchPage, saved.currentPage]);
 
-  }, []);
-
-
-  // ---------- Frontend profile filtering ----------
+  // ---------------- FILTER CHANGE ----------------
 
   useEffect(() => {
-
-    let filteredData = [
-      ...allProfiles
-    ];
-
-
-    // Name filter
-
-    if (nameSearch.trim()) {
-      const searchedName = nameSearch
-        .trim()
-        .toLowerCase();
-
-      filteredData = filteredData.filter((profile) => {
-        const profileName = String(
-          profile.name || ""
-        )
-          .trim()
-          .toLowerCase();
-
-        return profileName.includes(searchedName);
-      });
+    // Initial restore ke time filter API call mat karo
+    if (
+      firstLoad.current ||
+      restoringBrowse.current
+    ) {
+      return;
     }
 
-    // Gender filter
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-    if (gender) {
-
-      filteredData =
-        filteredData.filter(
-          (profile) =>
-
-            profile.gender
-              ?.trim()
-              .toLowerCase() ===
-
-            gender
-              .trim()
-              .toLowerCase()
+        await fetchPage(1, false);
+      } catch (err) {
+        console.error(
+          "Filter profile load:",
+          err
         );
 
-    }
-
-
-    // City filter
-
-    if (city) {
-
-      filteredData =
-        filteredData.filter(
-          (profile) =>
-
-            profile.city
-              ?.trim()
-              .toLowerCase()
-              .includes(
-                city
-                  .trim()
-                  .toLowerCase()
-              )
+        setError(
+          err.response?.data?.message ||
+            "Failed to load profiles"
         );
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
 
-    }
-
-
-    // Marital status filter
-
-    if (maritalStatus) {
-
-      filteredData =
-        filteredData.filter(
-          (profile) =>
-
-            profile.maritalStatus
-              ?.trim()
-              .toLowerCase() ===
-
-            maritalStatus
-              .trim()
-              .toLowerCase()
-        );
-
-    }
-
-
-    // Age filter
-
-    if (ageRange) {
-
-      const [
-        minimumAge,
-        maximumAge
-      ] = ageRange
-        .split("-")
-        .map(Number);
-
-
-      filteredData =
-        filteredData.filter(
-          (profile) => {
-
-            const profileAge =
-              calculateAge(
-                profile.dob
-              );
-
-            return (
-              profileAge >=
-              minimumAge &&
-
-              profileAge <=
-              maximumAge
-            );
-
-          }
-        );
-
-    }
-
-
-    // Income filter
-
-    if (incomeRange) {
-
-      const [
-        minimumIncome,
-        maximumIncome
-      ] = incomeRange
-        .split("-")
-        .map(Number);
-
-
-      filteredData =
-        filteredData.filter(
-          (profile) => {
-
-            /*
-            Removes commas and
-            other characters.
-  
-            Example:
-  
-            ₹8,00,000
-            becomes
-            800000
-            */
-
-            const profileIncome =
-              Number(
-                String(
-                  profile.income ||
-                  0
-                ).replace(
-                  /[^0-9]/g,
-                  ""
-                )
-              );
-
-
-            return (
-
-              profileIncome >=
-              minimumIncome &&
-
-              profileIncome <=
-              maximumIncome
-
-            );
-
-          }
-        );
-
-    }
-
-
-    setProfiles(
-      filteredData
-    );
-
-    setTotalCount(
-      filteredData.length
-    );
-
-    setTotalPages(1);
-
+    return () => clearTimeout(timer);
   }, [
     nameSearch,
-
-    allProfiles,
-
     gender,
-
     city,
-
     maritalStatus,
-
     ageRange,
-
-    incomeRange
-
+    incomeRange,
+    fetchPage,
   ]);
 
-  // ---------- Delete ----------
+  // ---------------- SAVE STATE ----------------
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      "browseFilters",
+      JSON.stringify({
+        nameSearch,
+        gender,
+        city,
+        maritalStatus,
+        ageRange,
+        incomeRange,
+        currentPage,
+      })
+    );
+  }, [
+    nameSearch,
+    gender,
+    city,
+    maritalStatus,
+    ageRange,
+    incomeRange,
+    currentPage,
+  ]);
+
+  // ---------------- RESTORE EXACT PROFILE ----------------
+
+  useEffect(() => {
+    // Saved pages load hone se pehle restore mat karo
+    if (restoringBrowse.current) return;
+
+    const profileId =
+      sessionStorage.getItem(
+        "browseReturnProfileId"
+      );
+
+    const scroll =
+      sessionStorage.getItem(
+        "browseScrollPosition"
+      );
+
+    if (!profileId && !scroll) return;
+
+    if (!profiles.length) return;
+
+    const timer = setTimeout(() => {
+      const element = profileId
+        ? document.getElementById(
+            `profile-${profileId}`
+          )
+        : null;
+
+      // Prefer exact profile
+      if (element) {
+        element.scrollIntoView({
+          behavior: "auto",
+          block: "center",
+        });
+      }
+
+      // Fallback to previous scroll position
+      else if (scroll) {
+        window.scrollTo({
+          top: Number(scroll),
+          behavior: "auto",
+        });
+      }
+
+      sessionStorage.removeItem(
+        "browseReturnProfileId"
+      );
+
+      sessionStorage.removeItem(
+        "browseScrollPosition"
+      );
+
+      sessionStorage.removeItem(
+        "browseReturnPage"
+      );
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [profiles]);
+
+  // ---------------- SHOW MORE ----------------
+
+  const handleShowMore = async () => {
+    if (loading || !hasMore) return;
+
+    try {
+      setLoading(true);
+
+      await fetchPage(
+        currentPage + 1,
+        true
+      );
+    } catch (err) {
+      console.error(err);
+
+      toast.error(
+        err.response?.data?.message ||
+          "Failed to load more profiles"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------- OPEN PROFILE ----------------
+
+  const openProfile = (profileId) => {
+    // Current exact scroll position
+    sessionStorage.setItem(
+      "browseScrollPosition",
+      String(window.scrollY)
+    );
+
+    // Exact profile ID
+    sessionStorage.setItem(
+      "browseReturnProfileId",
+      profileId
+    );
+
+    // Current loaded page
+    sessionStorage.setItem(
+      "browseReturnPage",
+      String(currentPage)
+    );
+
+    navigate(
+      `/browse-profile/${profileId}`
+    );
+  };
+
+  // ---------------- DELETE ----------------
+
   const handleDelete = useCallback(
     async (profileId) => {
-      if (!window.confirm("Are you sure you want to delete this profile?")) return;
+      const confirmDelete =
+        window.confirm(
+          "Are you sure you want to delete this profile?"
+        );
+
+      if (!confirmDelete) return;
+
       try {
-        await axios.delete(`${API_URL}/api/profile/delete/${profileId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfiles((prev) => prev.filter((p) => p._id !== profileId));
-        setTotalCount((prev) => Math.max(0, prev - 1));
-        toast.success("Profile deleted successfully!");
+        await axios.delete(
+          `${API_URL}/api/profile/delete/${profileId}`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+        setProfiles((prev) =>
+          prev.filter(
+            (profile) =>
+              profile._id !== profileId
+          )
+        );
+
+        setTotalCount((prev) =>
+          Math.max(0, prev - 1)
+        );
+
+        toast.success(
+          "Profile deleted successfully!"
+        );
       } catch (err) {
         console.error(err);
-        toast.error(err.response?.data?.message || "Failed to delete profile");
+
+        toast.error(
+          err.response?.data?.message ||
+            "Failed to delete profile"
+        );
       }
     },
     [token]
   );
+
+  // ---------------- RESET ----------------
 
   const resetFilters = () => {
     setNameSearch("");
     setGender("");
     setCityInput("");
     setCity("");
+    setMaritalStatus("");
     setAgeRange("");
     setIncomeRange("");
-    setMaritalStatus("");
-    sessionStorage.removeItem("browseFilters");
+    setCurrentPage(1);
+
+    sessionStorage.removeItem(
+      "browseFilters"
+    );
   };
 
-  // ---------- Loading (first load only) ----------
-  if (loading && profiles.length === 0) {
-    return (
-      <Loader />
-    );
+  // ---------------- LOADING ----------------
+
+  if (
+    loading &&
+    profiles.length === 0
+  ) {
+    return <Loader />;
   }
 
   if (error) {
-    return <p className="text-center mt-20 text-red-600">{error}</p>;
+    return (
+      <div className="px-4 py-20 text-center text-red-600">
+        {error}
+      </div>
+    );
   }
 
   return (
-    <section className="min-h-screen py-10 max-w-7xl mx-auto px-4 md:px-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-2xl lg:text-3xl font-bold">Browse Matches</h2>
-          <p className="text-gray-500 mt-0">{totalCount} Profiles Found</p>
-        </div>
-        <button
-          onClick={() => setShowFilters(true)}
-          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg transition"
-        >
-          <Filter size={20} />
-          Filters
-        </button>
-      </div>
+    <section className="min-h-screen w-full overflow-x-hidden py-6 sm:py-8 lg:py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 
-      {/* Filter Popup */}
-      {showFilters && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">Filter Profiles</h2>
-                <p className="text-sm text-gray-500">Find your perfect match</p>
-              </div>
-              <button
-                onClick={() => setShowFilters(false)}
-                className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition"
-              >
-                <X size={20} />
-              </button>
-            </div>
+        {/* HEADER */}
 
-            <div className="p-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Name Search */}
+        <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">
+              Browse Matches
+            </h2>
 
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <Search size={16} />
-                    Name
-                  </label>
+            <p className="mt-1 text-sm text-gray-500 sm:text-base">
+              {totalCount} Profiles Found
+            </p>
 
-                  <div className="relative">
-                    <Search
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
+            {/* ACTIVE FILTERS */}
 
-                    <input
-                      type="text"
-                      value={nameSearch}
-                      onChange={(e) =>
-                        setNameSearch(e.target.value)
+            {(nameSearch ||
+              gender ||
+              city ||
+              maritalStatus ||
+              ageRange ||
+              incomeRange) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+
+                {/* NAME */}
+
+                {nameSearch && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                    Name: {nameSearch}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNameSearch("")
                       }
-                      placeholder="Search by name"
-                      className="w-full h-10 rounded-lg border border-gray-300 pl-9 pr-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                    />
-                  </div>
-                </div>
-                {/* Gender */}
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-blue-200"
+                      aria-label="Remove name filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+
+                {/* GENDER */}
+
+                {gender && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-700">
+                    Gender: {gender}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGender("")
+                      }
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-pink-200"
+                      aria-label="Remove gender filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+
+                {/* CITY */}
+
+                {city && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                    City: {city}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCity("");
+                        setCityInput("");
+                      }}
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-green-200"
+                      aria-label="Remove city filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+
+                {/* MARITAL STATUS */}
+
+                {maritalStatus && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
+                    Status: {maritalStatus}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMaritalStatus("")
+                      }
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-purple-200"
+                      aria-label="Remove marital status filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+
+                {/* AGE */}
+
+                {ageRange && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+                    Age: {ageRange}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAgeRange("")
+                      }
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-orange-200"
+                      aria-label="Remove age filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+
+                {/* SALARY */}
+
+                {incomeRange && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+                    Salary:{" "}
+                    {incomeRange
+                      .split("-")
+                      .map(
+                        (value) =>
+                          `${Number(
+                            value
+                          ).toLocaleString(
+                            "en-IN"
+                          )}`
+                      )
+                      .join(
+                        " - ₹"
+                      )}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIncomeRange("")
+                      }
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-emerald-200"
+                      aria-label="Remove salary filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* FILTER BUTTON */}
+
+          <button
+            onClick={() =>
+              setShowFilters(true)
+            }
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 px-5 py-2.5 text-white shadow-md transition hover:bg-red-600 sm:w-auto sm:px-6 sm:py-3"
+          >
+            <Filter size={18} />
+            Filters
+          </button>
+        </div>
+
+        {/* FILTER MODAL */}
+
+        {showFilters && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+            <div className="max-h-[95vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:max-w-2xl sm:rounded-2xl">
+
+              {/* MODAL HEADER */}
+
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-4 py-4 sm:px-6">
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <Users size={16} />
-                    Gender
-                  </label>
-                  <select
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
+                  <h2 className="text-lg font-bold text-gray-800 sm:text-xl">
+                    Filter Profiles
+                  </h2>
+
+                  <p className="text-xs text-gray-500 sm:text-sm">
+                    Find your perfect match
+                  </p>
                 </div>
 
-                {/* City */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <MapPin size={16} />
-                    City
-                  </label>
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      value={cityInput}
-                      onChange={(e) => setCityInput(e.target.value)}
-                      placeholder="Search City"
-                      className="w-full h-10 rounded-lg border border-gray-300 pl-9 pr-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Age */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <Calendar size={16} />
-                    Age
-                  </label>
-                  <select
-                    value={ageRange}
-                    onChange={(e) => setAgeRange(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                  >
-                    <option value="">Select Age</option>
-                    <option value="18-20">18-20</option>
-                    <option value="21-25">21-25</option>
-                    <option value="26-30">26-30</option>
-                    <option value="31-35">31-35</option>
-                    <option value="36-40">36-40</option>
-                  </select>
-                </div>
-
-                {/* Salary */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <IndianRupee size={16} />
-                    Salary
-                  </label>
-                  <select
-                    value={incomeRange}
-                    onChange={(e) => setIncomeRange(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                  >
-                    <option value="">Select Salary</option>
-                    <option value="200000-500000">2 LPA - 5 LPA</option>
-                    <option value="600000-1000000">6 LPA - 10 LPA</option>
-                    <option value="1100000-1500000">11 LPA - 15 LPA</option>
-                    <option value="1600000-2000000">16 LPA - 20 LPA</option>
-                    <option value="2100000-2500000">21 LPA - 25 LPA</option>
-                    <option value="2600000-3000000">26 LPA - 30 LPA</option>
-                  </select>
-                </div>
-
-                {/* Marital Status */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
-                    <Heart size={16} />
-                    Marital Status
-                  </label>
-                  <select
-                    value={maritalStatus}
-                    onChange={(e) => setMaritalStatus(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                  >
-                    <option value="">Select Status</option>
-                    <option value="Unmarried">Unmarried</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widowed">Widowed</option>
-                    <option value="Separated">Separated</option>
-                  </select>
-                </div>
+                <button
+                  onClick={() =>
+                    setShowFilters(false)
+                  }
+                  className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6 pt-5 border-t">
-                <button
-                  onClick={resetFilters}
-                  className="h-10 px-5 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center gap-2 text-sm font-medium transition"
-                >
-                  <RotateCcw size={16} />
-                  Reset
-                </button>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="h-10 px-6 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium shadow-md transition"
-                >
-                  Apply Filters
-                </button>
+              {/* FILTER CONTENT */}
+
+              <div className="p-4 sm:p-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                  {/* NAME */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Search size={15} />
+                      Name
+                    </label>
+
+                    <div className="relative">
+                      <Search
+                        size={16}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+
+                      <input
+                        value={nameSearch}
+                        onChange={(e) =>
+                          setNameSearch(
+                            e.target.value
+                          )
+                        }
+                        placeholder="Search by name"
+                        className="h-11 w-full rounded-lg border border-gray-300 pl-9 pr-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* GENDER */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Users size={15} />
+                      Gender
+                    </label>
+
+                    <select
+                      value={gender}
+                      onChange={(e) =>
+                        setGender(
+                          e.target.value
+                        )
+                      }
+                      className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">
+                        Select Gender
+                      </option>
+
+                      <option value="Male">
+                        Male
+                      </option>
+
+                      <option value="Female">
+                        Female
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* CITY */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <MapPin size={15} />
+                      City
+                    </label>
+
+                    <div className="relative">
+                      <Search
+                        size={16}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+
+                      <input
+                        value={cityInput}
+                        onChange={(e) =>
+                          setCityInput(
+                            e.target.value
+                          )
+                        }
+                        placeholder="Search City"
+                        className="h-11 w-full rounded-lg border border-gray-300 pl-9 pr-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* AGE */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Calendar size={15} />
+                      Age
+                    </label>
+
+                    <select
+                      value={ageRange}
+                      onChange={(e) =>
+                        setAgeRange(
+                          e.target.value
+                        )
+                      }
+                      className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">
+                        Select Age
+                      </option>
+
+                      <option value="18-20">
+                        18-20
+                      </option>
+
+                      <option value="21-25">
+                        21-25
+                      </option>
+
+                      <option value="26-30">
+                        26-30
+                      </option>
+
+                      <option value="31-35">
+                        31-35
+                      </option>
+
+                      <option value="36-40">
+                        36-40
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* INCOME */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <IndianRupee size={15} />
+                      Salary
+                    </label>
+
+                    <select
+                      value={incomeRange}
+                      onChange={(e) =>
+                        setIncomeRange(
+                          e.target.value
+                        )
+                      }
+                      className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">
+                        Select Salary
+                      </option>
+
+                      <option value="200000-500000">
+                        2 LPA - 5 LPA
+                      </option>
+
+                      <option value="600000-1000000">
+                        6 LPA - 10 LPA
+                      </option>
+
+                      <option value="1100000-1500000">
+                        11 LPA - 15 LPA
+                      </option>
+
+                      <option value="1600000-2000000">
+                        16 LPA - 20 LPA
+                      </option>
+
+                      <option value="2100000-2500000">
+                        21 LPA - 25 LPA
+                      </option>
+
+                      <option value="2600000-3000000">
+                        26 LPA - 30 LPA
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* MARITAL STATUS */}
+
+                  <div>
+                    <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Heart size={15} />
+                      Marital Status
+                    </label>
+
+                    <select
+                      value={maritalStatus}
+                      onChange={(e) =>
+                        setMaritalStatus(
+                          e.target.value
+                        )
+                      }
+                      className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">
+                        Select Status
+                      </option>
+
+                      <option value="Unmarried">
+                        Unmarried
+                      </option>
+
+                      <option value="Married">
+                        Married
+                      </option>
+
+                      <option value="Divorced">
+                        Divorced
+                      </option>
+
+                      <option value="Widowed">
+                        Widowed
+                      </option>
+
+                      <option value="Separated">
+                        Separated
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* FILTER ACTIONS */}
+
+                <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+                  <button
+                    onClick={resetFilters}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-5 text-sm font-medium hover:bg-gray-100 sm:w-auto"
+                  >
+                    <RotateCcw size={16} />
+                    Reset
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setShowFilters(false)
+                    }
+                    className="h-11 w-full rounded-lg bg-red-500 px-6 text-sm font-medium text-white shadow-md hover:bg-red-600 sm:w-auto"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Subtle loading indicator while re-fetching filtered/paged data */}
-      {loading && profiles.length > 0 && (
-        <div className="text-center text-sm text-gray-400 mb-4">Updating results…</div>
-      )}
+        {/* LOADING */}
 
-      {/* Empty */}
-      {!loading && profiles.length === 0 && (
-        <div className="text-center text-gray-500 text-lg">No profiles found</div>
-      )}
-
-      {/* Profiles */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {profiles.map((profile) => (
-          <div key={profile._id} className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden">
-            <img
-              src={optimizeImage(profile.photo, 400) || PLACEHOLDER_IMG}
-              alt={profile.name}
-              loading="lazy"
-              decoding="async"
-              width="400"
-              height="300"
-              className="w-full h-[300px] object-cover object-top cursor-pointer hover:opacity-90 transition"
-              onClick={() => setSelectedImage(profile.photo || PLACEHOLDER_IMG)}
-            />
-            <div className="p-4">
-              <h3 className="font-semibold capitalize text-lg">{profile.name}</h3>
-              <p className="text-gray-500 text-sm">{profile.city}</p>
+        {loading &&
+          profiles.length > 0 && (
+            <div className="mb-5 text-center text-sm text-gray-400">
+              Loading profiles...
             </div>
-            <div className="px-4 pb-4 text-sm">
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div>
-                  <p className="text-gray-400">AGE</p>
-                  <p className="font-medium">{calculateAge(profile.dob)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400">INCOME</p>
-                  <p className="font-medium">₹{profile.income}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400">EDUCATION</p>
-                  <p className="font-medium">{profile.education}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400">PROFESSION</p>
-                  <p className="font-medium">{profile.occupation}</p>
-                </div>
+          )}
+
+        {/* EMPTY */}
+
+        {!loading &&
+          profiles.length === 0 && (
+            <div className="py-16 text-center text-gray-500">
+              No profiles found
+            </div>
+          )}
+
+        {/* PROFILE GRID */}
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+          {profiles.map((profile) => (
+            <div
+              key={profile._id}
+              id={`profile-${profile._id}`}
+              className="min-w-0 overflow-hidden rounded-2xl bg-white shadow transition hover:shadow-xl"
+            >
+
+              {/* IMAGE */}
+
+              <div className="aspect-[4/4] w-full overflow-hidden bg-gray-100">
+                <img
+                  src={
+                    optimizeImage(
+                      profile.photo,
+                      400
+                    ) ||
+                    PLACEHOLDER_IMG
+                  }
+                  alt={
+                    profile.name ||
+                    "Profile"
+                  }
+                  loading="lazy"
+                  decoding="async"
+                  width="400"
+                  height="300"
+                  className="!h-full !w-full cursor-pointer object-cover object-top transition hover:opacity-90"
+                  onClick={() =>
+                    setSelectedImage(
+                      profile.photo ||
+                        PLACEHOLDER_IMG
+                    )
+                  }
+                />
               </div>
 
-              <div className="flex flex-col gap-2">
+              {/* NAME / CITY */}
+
+              <div className="p-4">
+                <h3 className="truncate text-base font-semibold capitalize sm:text-lg">
+                  {profile.name}
+                </h3>
+
+                <p className="mt-1 truncate text-sm text-gray-500">
+                  {profile.city}
+                </p>
+              </div>
+
+              {/* DETAILS */}
+
+              <div className="px-4 pb-4 text-sm">
+                <div className="mb-4 grid grid-cols-2 gap-x-3 gap-y-4">
+
+                  {/* AGE */}
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-400">
+                      AGE
+                    </p>
+
+                    <p className="truncate font-medium">
+                      {calculateAge(
+                        profile.dob
+                      )}
+                    </p>
+                  </div>
+
+                  {/* INCOME */}
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-400">
+                      INCOME
+                    </p>
+
+                    <p className="truncate font-medium">
+                      ₹{profile.income}
+                    </p>
+                  </div>
+
+                  {/* EDUCATION */}
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-400">
+                      EDUCATION
+                    </p>
+
+                    <p className="truncate font-medium">
+                      {profile.education}
+                    </p>
+                  </div>
+
+                  {/* PROFESSION */}
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-400">
+                      PROFESSION
+                    </p>
+
+                    <p className="truncate font-medium">
+                      {profile.occupation}
+                    </p>
+                  </div>
+                </div>
+
+                {/* VIEW BUTTON */}
+
                 <button
-                  onClick={() => {
-                    sessionStorage.setItem("browseScrollPosition", window.scrollY);
-                    navigate(`/browse-profile/${profile._id}`);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200"
+                  onClick={() =>
+                    openProfile(
+                      profile._id
+                    )
+                  }
+                  className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-blue-100 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-200"
                 >
                   <FileText size={16} />
                   View Full Biodata
                 </button>
+
+                {/* ADMIN BUTTONS */}
+
                 {user?.role === "admin" && (
-                  <div className="flex gap-2 mt-2">
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+
                     <button
-                      onClick={() => navigate(`/update-profile/${profile._id}`)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 py-2 rounded-lg hover:bg-green-200"
+                      onClick={() =>
+                        navigate(
+                          `/update-profile/${profile._id}`
+                        )
+                      }
+                      className="flex min-h-10 items-center justify-center gap-1.5 rounded-lg bg-green-100 px-2 py-2 text-sm font-medium text-green-700 hover:bg-green-200"
                     >
-                      <Edit size={16} />
+                      <Edit size={15} />
                       Edit
                     </button>
+
                     <button
-                      onClick={() => handleDelete(profile._id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-700 py-2 rounded-lg hover:bg-red-200"
+                      onClick={() =>
+                        handleDelete(
+                          profile._id
+                        )
+                      }
+                      className="flex min-h-10 items-center justify-center gap-1.5 rounded-lg bg-red-100 px-2 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                       Delete
                     </button>
+
                   </div>
                 )}
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* SHOW MORE */}
+
+        {hasMore && (
+          <div className="mt-8 flex justify-center sm:mt-10">
+            <button
+              onClick={handleShowMore}
+              disabled={loading}
+              className="w-full rounded-xl bg-red-500 px-8 py-3 font-medium text-white shadow-md transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[180px]"
+            >
+              {loading
+                ? "Loading..."
+                : "Show More"}
+            </button>
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
-          >
-            Previous
-          </button>
+      {/* IMAGE PREVIEW */}
 
-          {[...Array(totalPages)].map((_, index) => {
-            const page = index + 1;
-            return (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg border ${currentPage === page ? "bg-red-500 text-white" : "bg-white"
-                  }`}
-              >
-                {page}
-              </button>
-            );
-          })}
-
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="px-4 py-2 border rounded-lg bg-white disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
-
-      {/* Image Preview Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-3 sm:p-5"
+          onClick={() =>
+            setSelectedImage(null)
+          }
         >
           <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+            onClick={() =>
+              setSelectedImage(null)
+            }
+            className="absolute right-3 top-3 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-black hover:bg-gray-200 sm:right-5 sm:top-5 sm:px-4 sm:text-base"
           >
             ✕ Close
           </button>
+
           <img
             src={selectedImage}
             alt="Profile Preview"
-            onClick={(e) => e.stopPropagation()}
-            className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+            className="!h-[85vh] !w-full rounded-lg object-contain shadow-2xl sm:rounded-xl"
           />
         </div>
       )}
     </section>
-  )
+  );
 };
 
 export default BrowseProfiles;
