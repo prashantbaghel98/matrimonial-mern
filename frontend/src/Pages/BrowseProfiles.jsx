@@ -31,6 +31,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const LIMIT = 25;
 
+const PROFILE_CACHE_PREFIX = "browseProfilesCache:";
+const PROFILE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 const PLACEHOLDER_IMG =
   "https://placehold.co/300x400?text=No+Photo";
 
@@ -62,6 +65,45 @@ const getSavedFilters = () => {
     return {};
   }
 };
+
+
+
+
+const getProfileCache = (key) => {
+  try {
+    const value = sessionStorage.getItem(key);
+    if (!value) return null;
+
+    const cached = JSON.parse(value);
+
+    if (
+      !cached.timestamp ||
+      Date.now() - cached.timestamp > PROFILE_CACHE_TTL
+    ) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+
+    return cached;
+  } catch {
+    return null;
+  }
+};
+
+const saveProfileCache = (key, data) => {
+  try {
+    sessionStorage.setItem(
+      key,
+      JSON.stringify({
+        ...data,
+        timestamp: Date.now(),
+      })
+    );
+  } catch (error) {
+    console.warn("Unable to save profile cache:", error);
+  }
+};
+
 
 // =====================================================
 // COMPONENT
@@ -285,55 +327,87 @@ const BrowseProfiles = () => {
   // FETCH SINGLE PAGE
   // =====================================================
 
-  const fetchPage = useCallback(
-    async (
-      page,
-      append = false,
-      signal
-    ) => {
-      const response =
-        await axios.get(
-          `${API_URL}/api/profile`,
-          {
-            params:
-              getParams(page),
 
-            signal,
-          }
+const fetchPage = useCallback(
+  async (page, append = false, signal) => {
+    const params = getParams(page);
+
+    const cacheKey =
+      PROFILE_CACHE_PREFIX +
+      JSON.stringify(params);
+
+    // Display cached profiles immediately
+    const cached = getProfileCache(cacheKey);
+
+    if (cached) {
+      setProfiles((prev) => {
+        if (!append) return cached.profiles || [];
+
+        const merged = [...prev];
+        const ids = new Set(
+          prev.map((profile) => profile._id)
         );
 
-      const data =
-        response.data;
+        (cached.profiles || []).forEach((profile) => {
+          if (!ids.has(profile._id)) {
+            merged.push(profile);
+            ids.add(profile._id);
+          }
+        });
 
-      const newProfiles =
-        data.profiles || [];
+        return merged;
+      });
 
-      setProfiles((prev) =>
-        append
-          ? [
-              ...prev,
-              ...newProfiles,
-            ]
-          : newProfiles
+      setTotalCount(cached.total || 0);
+      setCurrentPage(cached.page || page);
+      setHasMore(Boolean(cached.hasMore));
+    }
+
+    // Fetch fresh data in the background
+    const response = await axios.get(
+      `${API_URL}/api/profile`,
+      { params, signal }
+    );
+
+    const data = response.data;
+    const newProfiles = data.profiles || [];
+
+    setProfiles((prev) => {
+      if (!append) return newProfiles;
+
+      const merged = [...prev];
+      const ids = new Set(
+        prev.map((profile) => profile._id)
       );
 
-      setTotalCount(
-        Number(data.total) || 0
-      );
+      newProfiles.forEach((profile) => {
+        if (!ids.has(profile._id)) {
+          merged.push(profile);
+          ids.add(profile._id);
+        }
+      });
 
-      setCurrentPage(
-        Number(data.page) ||
-          page
-      );
+      return merged;
+    });
 
-      setHasMore(
-        Boolean(data.hasMore)
-      );
+    const result = {
+      profiles: newProfiles,
+      total: Number(data.total) || 0,
+      page: Number(data.page) || page,
+      hasMore: Boolean(data.hasMore),
+    };
 
-      return data;
-    },
-    [getParams]
-  );
+    setTotalCount(result.total);
+    setCurrentPage(result.page);
+    setHasMore(result.hasMore);
+
+    saveProfileCache(cacheKey, result);
+
+    return data;
+  },
+  [getParams]
+);
+
 
   // =====================================================
   // CITY DEBOUNCE

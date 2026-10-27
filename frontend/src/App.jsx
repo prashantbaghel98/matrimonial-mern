@@ -27,6 +27,7 @@ import PrivacyPolicy from './Pages/PrivacyPolicy'
 import Terms from './Pages/Terms'
 import Disclaimer from './Pages/Disclaimer'
 import RefundPolicy from './Pages/RefundPolicy'
+import axios from "axios";
 
 
 
@@ -47,6 +48,71 @@ function App() {
     localStorage.setItem("offerPopupShown", "true");
     setIsOpen(false);
   };
+
+
+
+
+useEffect(() => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  const CACHE_KEY =
+    'browseProfilesCache:{"page":1,"limit":25}';
+  const CACHE_TTL = 5 * 60 * 1000;
+
+  let cancelled = false;
+
+  const preloadProfiles = async () => {
+    try {
+      // Reuse a valid cache if one already exists
+      const existing = sessionStorage.getItem(CACHE_KEY);
+
+      if (existing) {
+        const cached = JSON.parse(existing);
+
+        if (
+          cached.timestamp &&
+          Date.now() - cached.timestamp < CACHE_TTL
+        ) {
+          return;
+        }
+      }
+
+      // Automatically fetch profiles in the background
+      const response = await axios.get(
+        `${API_URL}/api/profile`,
+        {
+          params: {
+            page: 1,
+            limit: 25,
+          },
+        }
+      );
+
+      if (cancelled) return;
+
+      const data = response.data;
+
+      // Save the result for BrowseProfiles.jsx
+      sessionStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          profiles: data.profiles || [],
+          total: Number(data.total) || 0,
+          page: Number(data.page) || 1,
+          hasMore: Boolean(data.hasMore),
+          timestamp: Date.now(),
+        })
+      );
+    } catch (error) {
+      console.error("Profile preloading failed:", error);
+    }
+  };
+
+  preloadProfiles();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
 
 
